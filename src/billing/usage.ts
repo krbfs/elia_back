@@ -1,4 +1,4 @@
-import { db, type ProfileRow } from '../db.js';
+import { query, type ProfileRow } from '../db.js';
 
 export const FREE_DAILY_EMERGENCY_LIMIT = 1;
 
@@ -41,7 +41,7 @@ export function canUseTechnique(
   return { allowed: true };
 }
 
-export function incrementDailyUsage(vkUserId: number, profile: ProfileRow | undefined) {
+export async function incrementDailyUsage(vkUserId: number, profile: ProfileRow | undefined) {
   if (profile?.is_premium) return;
 
   const today = todayKey();
@@ -50,11 +50,12 @@ export function incrementDailyUsage(vkUserId: number, profile: ProfileRow | unde
       ? (profile?.daily_techniques_count ?? 0)
       : 0;
 
-  db.prepare(`
-    UPDATE profiles
-    SET daily_techniques_date = ?,
-        daily_techniques_count = ?,
-        updated_at = datetime('now')
-    WHERE vk_user_id = ?
-  `).run(today, existing + 1, vkUserId);
+  await query(
+    `UPDATE profiles
+     SET daily_techniques_date = $1,
+         daily_techniques_count = $2,
+         updated_at = NOW()
+     WHERE vk_user_id = $3`,
+    [today, existing + 1, vkUserId],
+  );
 }

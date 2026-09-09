@@ -1,119 +1,96 @@
-import Database from 'better-sqlite3';
-import path from 'node:path';
-import fs from 'node:fs';
+import 'dotenv/config';
+import pg from 'pg';
 
-const dataDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL is required (Neon Postgres connection string)');
 }
 
-const dbPath = process.env.DATABASE_PATH ?? path.join(dataDir, 'elia.sqlite');
-export const db = new Database(dbPath);
+export const pool = new pg.Pool({
+  connectionString,
+  ssl: connectionString.includes('neon.tech') || process.env.DATABASE_SSL === 'true'
+    ? { rejectUnauthorized: false }
+    : undefined,
+  max: Number(process.env.DATABASE_POOL_MAX ?? 10),
+});
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    vk_user_id INTEGER PRIMARY KEY,
-    first_name TEXT,
-    last_name TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS profiles (
-    vk_user_id INTEGER PRIMARY KEY,
-    trimester TEXT,
-    onboarding_completed INTEGER NOT NULL DEFAULT 0,
-    base_type TEXT,
-    secondary_type TEXT,
-    scores_json TEXT,
-    platform TEXT,
-    last_stress INTEGER,
-    techniques_completed INTEGER NOT NULL DEFAULT 0,
-    crisis_level TEXT NOT NULL DEFAULT 'green',
-    epds_score INTEGER,
-    epds_completed_at TEXT,
-    is_premium INTEGER NOT NULL DEFAULT 0,
-    daily_techniques_date TEXT,
-    daily_techniques_count INTEGER NOT NULL DEFAULT 0,
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (vk_user_id) REFERENCES users(vk_user_id)
-  );
-`);
-
-const profileColumns = db
-  .prepare('PRAGMA table_info(profiles)')
-  .all() as { name: string }[];
-
-function ensureProfileColumn(name: string, ddl: string) {
-  if (!profileColumns.some((column) => column.name === name)) {
-    db.exec(ddl);
-  }
+export async function query(text: string, params: unknown[] = []) {
+  return pool.query(text, params);
 }
 
-ensureProfileColumn('base_type', 'ALTER TABLE profiles ADD COLUMN base_type TEXT');
-ensureProfileColumn('secondary_type', 'ALTER TABLE profiles ADD COLUMN secondary_type TEXT');
-ensureProfileColumn('scores_json', 'ALTER TABLE profiles ADD COLUMN scores_json TEXT');
-ensureProfileColumn('platform', 'ALTER TABLE profiles ADD COLUMN platform TEXT');
-ensureProfileColumn('last_stress', 'ALTER TABLE profiles ADD COLUMN last_stress INTEGER');
-ensureProfileColumn(
-  'techniques_completed',
-  'ALTER TABLE profiles ADD COLUMN techniques_completed INTEGER NOT NULL DEFAULT 0',
-);
-ensureProfileColumn(
-  'crisis_level',
-  "ALTER TABLE profiles ADD COLUMN crisis_level TEXT NOT NULL DEFAULT 'green'",
-);
-ensureProfileColumn('epds_score', 'ALTER TABLE profiles ADD COLUMN epds_score INTEGER');
-ensureProfileColumn('epds_completed_at', 'ALTER TABLE profiles ADD COLUMN epds_completed_at TEXT');
-ensureProfileColumn(
-  'is_premium',
-  'ALTER TABLE profiles ADD COLUMN is_premium INTEGER NOT NULL DEFAULT 0',
-);
-ensureProfileColumn(
-  'daily_techniques_date',
-  'ALTER TABLE profiles ADD COLUMN daily_techniques_date TEXT',
-);
-ensureProfileColumn(
-  'daily_techniques_count',
-  'ALTER TABLE profiles ADD COLUMN daily_techniques_count INTEGER NOT NULL DEFAULT 0',
-);
+export async function queryOne<T>(text: string, params: unknown[] = []): Promise<T | undefined> {
+  const result = await pool.query(text, params);
+  return (result.rows[0] as T) ?? undefined;
+}
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS techniques (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    text TEXT NOT NULL,
-    duration_sec INTEGER NOT NULL,
-    audio_url TEXT,
-    level TEXT NOT NULL,
-    context TEXT NOT NULL DEFAULT 'any',
-    psychotypes_json TEXT NOT NULL DEFAULT '[]',
-    reaction TEXT,
-    evidence TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
+export async function queryAll<T>(text: string, params: unknown[] = []): Promise<T[]> {
+  const result = await pool.query(text, params);
+  return result.rows as T[];
+}
 
-  CREATE TABLE IF NOT EXISTS favorites (
-    vk_user_id INTEGER NOT NULL,
-    technique_id INTEGER NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    PRIMARY KEY (vk_user_id, technique_id),
-    FOREIGN KEY (technique_id) REFERENCES techniques(id)
-  );
+export async function initDb() {
+  await query(`
+    CREATE TABLE IF NOT EXISTS users (
+      vk_user_id BIGINT PRIMARY KEY,
+      first_name TEXT,
+      last_name TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
 
-  CREATE TABLE IF NOT EXISTS partner_profiles (
-    user_vk_id INTEGER PRIMARY KEY,
-    subjective_base_type TEXT,
-    subjective_secondary_type TEXT,
-    subjective_scores_json TEXT,
-    partner_vk_id INTEGER,
-    partner_self_base_type TEXT,
-    partner_self_secondary_type TEXT,
-    partner_self_scores_json TEXT,
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_vk_id) REFERENCES users(vk_user_id)
-  );
-`);
+    CREATE TABLE IF NOT EXISTS profiles (
+      vk_user_id BIGINT PRIMARY KEY REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      trimester TEXT,
+      onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
+      base_type TEXT,
+      secondary_type TEXT,
+      scores_json TEXT,
+      platform TEXT,
+      last_stress INTEGER,
+      techniques_completed INTEGER NOT NULL DEFAULT 0,
+      crisis_level TEXT NOT NULL DEFAULT 'green',
+      epds_score INTEGER,
+      epds_completed_at TIMESTAMPTZ,
+      is_premium BOOLEAN NOT NULL DEFAULT FALSE,
+      daily_techniques_date TEXT,
+      daily_techniques_count INTEGER NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS techniques (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      text TEXT NOT NULL,
+      duration_sec INTEGER NOT NULL,
+      audio_url TEXT,
+      level TEXT NOT NULL,
+      context TEXT NOT NULL DEFAULT 'any',
+      psychotypes_json TEXT NOT NULL DEFAULT '[]',
+      reaction TEXT,
+      evidence TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS favorites (
+      vk_user_id BIGINT NOT NULL,
+      technique_id INTEGER NOT NULL REFERENCES techniques(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (vk_user_id, technique_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS partner_profiles (
+      user_vk_id BIGINT PRIMARY KEY REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      subjective_base_type TEXT,
+      subjective_secondary_type TEXT,
+      subjective_scores_json TEXT,
+      partner_vk_id BIGINT,
+      partner_self_base_type TEXT,
+      partner_self_secondary_type TEXT,
+      partner_self_scores_json TEXT,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+}
 
 export type TechniqueRow = {
   id: number;
@@ -126,7 +103,7 @@ export type TechniqueRow = {
   psychotypes_json: string;
   reaction: string;
   evidence: string;
-  created_at: string;
+  created_at: Date | string;
 };
 
 export type PartnerProfileRow = {
@@ -138,13 +115,13 @@ export type PartnerProfileRow = {
   partner_self_base_type: string | null;
   partner_self_secondary_type: string | null;
   partner_self_scores_json: string | null;
-  updated_at: string;
+  updated_at: Date | string;
 };
 
 export type ProfileRow = {
   vk_user_id: number;
   trimester: string | null;
-  onboarding_completed: number;
+  onboarding_completed: boolean;
   base_type: string | null;
   secondary_type: string | null;
   scores_json: string | null;
@@ -153,17 +130,17 @@ export type ProfileRow = {
   techniques_completed: number;
   crisis_level: string;
   epds_score: number | null;
-  epds_completed_at: string | null;
-  is_premium: number;
+  epds_completed_at: Date | string | null;
+  is_premium: boolean;
   daily_techniques_date: string | null;
   daily_techniques_count: number;
-  updated_at: string;
+  updated_at: Date | string;
 };
 
 export type UserRow = {
   vk_user_id: number;
   first_name: string | null;
   last_name: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: Date | string;
+  updated_at: Date | string;
 };

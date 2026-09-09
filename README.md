@@ -1,6 +1,6 @@
 # Elia Back
 
-REST API для Elia: Express + TypeScript + SQLite.
+REST API для Elia: Express + TypeScript + Neon Postgres.
 
 ## Запуск
 
@@ -19,7 +19,8 @@ Health: http://localhost:3001/health
 |------------|----------|
 | `PORT` | Порт API (по умолчанию 3001) |
 | `FRONTEND_URL` | Origin фронта для CORS |
-| `DATABASE_PATH` | Путь к SQLite (по умолчанию `data/elia.sqlite`) |
+| `DATABASE_URL` | Neon Postgres (pooled connection string) |
+| `DATABASE_SSL` | `true` — принудительный SSL |
 
 ## Основные эндпоинты
 
