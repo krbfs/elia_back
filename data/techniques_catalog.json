@@ -1,0 +1,1085 @@
+{
+  "version": "1.1",
+  "updated_at": "2026-08-31",
+  "total_techniques": 39,
+  "premium_techniques": 15,
+  "metadata": {
+    "description": "Каталог техник для MVP приложения «Элия» (обновлённая версия)",
+    "scientific_basis": "CBT, ACT, Mindfulness, Polyvagal Theory, Coping Theory",
+    "target_audience": "Беременные женщины и мамы детей до 10 лет",
+    "platform": "VK Mini-App",
+    "changelog": "v1.1: Добавлены 4 премиум-техники для Индивидуалиста, Аналитика, Прагматика, Консерватора"
+  },
+  "techniques": [
+    {
+      "technique_id": 1,
+      "title": "Дыхание 4-7-8",
+      "slug": "breathing-4-7-8",
+      "description": "Глубокое дыхание для быстрого снижения напряжения. Вдох на 4 счёта, задержка на 7, выдох на 8.",
+      "scientific_basis": "Активация парасимпатической нервной системы через удлинение выдоха (Porges, 1995).",
+      "tags": {
+        "level": ["red", "yellow"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["audio", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Сядь удобно или ляг. Закрой глаза. Вдохни через нос на 4 счёта. Задержи дыхание на 7 счётов. Медленно выдохни через рот на 8 счётов. Повтори 3-4 раза.",
+        "audio_url": "/media/techniques/1_audio.mp3",
+        "audio_duration_seconds": 90,
+        "timer_seconds": 180,
+        "visual_url": "/media/techniques/1_visual.gif"
+      },
+      "metadata": {
+        "popularity_score": 4.7,
+        "completion_rate": 0.89,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 2,
+      "title": "Заземление 5-4-3-2-1",
+      "slug": "grounding-5-4-3-2-1",
+      "description": "Найди 5 вещей, которые видишь, 4 которые слышишь, 3 которые чувствуешь, 2 которые нюхаешь, 1 которую пробуешь на вкус.",
+      "scientific_basis": "Переключение внимания с внутренних переживаний на внешние стимулы снижает активность миндалевидного тела (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["red"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Оглянись вокруг. Назови 5 вещей, которые видишь. 4 звука, которые слышишь. 3 ощущения в теле. 2 запаха. 1 вкус.",
+        "audio_url": null,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.92,
+        "avg_stress_reduction": 2.1
+      }
+    },
+    {
+      "technique_id": 3,
+      "title": "Прогрессивная мышечная релаксация (сокращённая)",
+      "slug": "pmr-short",
+      "description": "Напряги и расслабь основные группы мышц: кулаки, плечи, лицо.",
+      "scientific_basis": "Снижение мышечного напряжения через контраст напряжения-расслабления (Jacobson, 1938).",
+      "tags": {
+        "level": ["red", "yellow"],
+        "context": ["physical", "sleep"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["audio", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Напряги кулаки на 5 секунд. Расслабь. Напряги плечи. Расслабь. Напряги лицо. Расслабь.",
+        "audio_url": "/media/techniques/3_audio.mp3",
+        "audio_duration_seconds": 90,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.3,
+        "completion_rate": 0.85,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 4,
+      "title": "Холодная вода на запястья",
+      "slug": "cold-water-wrists",
+      "description": "Подставь запястья под холодную воду на 30 секунд. Это активирует блуждающий нерв.",
+      "scientific_basis": "Стимуляция блуждающего нерва через терморецепторы запускает парасимпатический ответ (Porges, 1995).",
+      "tags": {
+        "level": ["red"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["interactive", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Подойди к раковине. Включи холодную воду. Подставь запястья на 30 секунд. Дыши медленно.",
+        "audio_url": null,
+        "timer_seconds": 30
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.88,
+        "avg_stress_reduction": 2.3
+      }
+    },
+    {
+      "technique_id": 5,
+      "title": "Быстрое заземление через стопы",
+      "slug": "feet-grounding",
+      "description": "Почувствуй стопы на полу. Перенеси вес с пятки на носок и обратно 5 раз.",
+      "scientific_basis": "Сенсорная стимуляция стоп активирует соматосенсорную кору, отвлекая от тревожных мыслей (Siegel, 2010).",
+      "tags": {
+        "level": ["red"],
+        "context": ["any"],
+        "psychotypes": ["Прагматик", "Индивидуалист"],
+        "stress_reaction": ["Бей"],
+        "trimester": ["any"],
+        "format": ["interactive", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Встань. Почувствуй стопы на полу. Перенеси вес на пятки. Затем на носки. Повтори 5 раз.",
+        "audio_url": null,
+        "timer_seconds": 60
+      },
+      "metadata": {
+        "popularity_score": 4.2,
+        "completion_rate": 0.80,
+        "avg_stress_reduction": 1.5
+      }
+    },
+    {
+      "technique_id": 6,
+      "title": "Дыхание по квадрату",
+      "slug": "box-breathing",
+      "description": "Вдох на 4 счёта, задержка на 4, выдох на 4, задержка на 4. Повтори 4 раза.",
+      "scientific_basis": "Ритмичное дыхание стабилизирует вариабельность сердечного ритма (HRV) и снижает кортизол (Gerritsen & Band, 2018).",
+      "tags": {
+        "level": ["red", "yellow"],
+        "context": ["any"],
+        "psychotypes": ["Аналитик", "Консерватор"],
+        "stress_reaction": ["Замри"],
+        "trimester": ["any"],
+        "format": ["audio", "timer", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Вдохни на 4 счёта. Задержи на 4. Выдохни на 4. Задержи на 4. Повтори 4 раза.",
+        "audio_url": "/media/techniques/6_audio.mp3",
+        "audio_duration_seconds": 90,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.87,
+        "avg_stress_reduction": 1.9
+      }
+    },
+    {
+      "technique_id": 7,
+      "title": "Быстрая физическая разрядка",
+      "slug": "quick-physical-release",
+      "description": "10 приседаний или 30 секунд бега на месте. Сбрось напряжение через движение.",
+      "scientific_basis": "Физическая активность снижает кортизол и повышает эндорфины (Salmon, 2001).",
+      "tags": {
+        "level": ["red", "yellow"],
+        "context": ["any"],
+        "psychotypes": ["Индивидуалист", "Прагматик"],
+        "stress_reaction": ["Бей"],
+        "trimester": ["1", "2", "3-6m"],
+        "format": ["video", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Сделай 10 приседаний или беги на месте 30 секунд. Почувствуй, как напряжение уходит.",
+        "audio_url": "/media/techniques/7_audio.mp3",
+        "video_url": "/media/techniques/7_video.mp4",
+        "timer_seconds": 60
+      },
+      "metadata": {
+        "popularity_score": 4.1,
+        "completion_rate": 0.75,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 8,
+      "title": "Быстрый мозговой штурм",
+      "slug": "quick-brainstorm",
+      "description": "Запиши 3 идеи, как решить проблему, даже самые безумные. Не фильтруй.",
+      "scientific_basis": "Вербализация мыслей снижает их эмоциональный заряд и активирует префронтальную кору (Beck, 1979).",
+      "tags": {
+        "level": ["yellow"],
+        "context": ["work", "conflict", "practical"],
+        "psychotypes": ["Инноватор"],
+        "stress_reaction": ["Дефлексия"],
+        "trimester": ["2", "3", "3-6m"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Запиши 3 идеи, как решить проблему. Не фильтруй — даже самые безумные варианты подойдут.",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.0,
+        "completion_rate": 0.78,
+        "avg_stress_reduction": 1.4
+      }
+    },
+    {
+      "technique_id": 9,
+      "title": "Визуализация безопасного места",
+      "slug": "safe-place-visualization",
+      "description": "Представь место, где тебе спокойно и красиво. Что ты видишь? Что слышишь? Что чувствуешь?",
+      "scientific_basis": "Визуализация активирует те же нейронные сети, что и реальный опыт, снижая кортизол (Holmes et al., 2008).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["psychosocial", "medical"],
+        "psychotypes": ["Эстет"],
+        "stress_reaction": ["Мимикрия"],
+        "trimester": ["2", "3", "3-6m"],
+        "format": ["audio", "interactive"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Закрой глаза. Представь место, где тебе спокойно. Что ты видишь? Что слышишь? Что чувствуешь?",
+        "audio_url": "/media/techniques/9_audio.mp3",
+        "audio_duration_seconds": 300,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.8,
+        "completion_rate": 0.82,
+        "avg_stress_reduction": 2.0
+      }
+    },
+    {
+      "technique_id": 10,
+      "title": "Чек-лист подготовки к УЗИ",
+      "slug": "ultrasound-checklist",
+      "description": "Пошаговая инструкция: что взять, что надеть, что спросить у врача.",
+      "scientific_basis": "Структурирование снижает тревогу через предсказуемость (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["practical", "medical"],
+        "psychotypes": ["Консерватор"],
+        "stress_reaction": ["Сливайся с толпой"],
+        "trimester": ["any"],
+        "format": ["text"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "✓ Возьми: направление, паспорт, полис, пелёнку. ✓ Надень: удобную одежду. ✓ Спроси: срок беременности, пол, вес, рост.",
+        "audio_url": null,
+        "timer_seconds": null
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.90,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 11,
+      "title": "Тёплый дневник",
+      "slug": "warm-journal",
+      "description": "Запиши, что ты чувствуешь прямо сейчас. Без оценки, просто опиши.",
+      "scientific_basis": "Экспрессивное письмо снижает стресс и улучшает эмоциональную регуляцию (Pennebaker & Beall, 1986).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["psychosocial", "conflict"],
+        "psychotypes": ["Эмпат"],
+        "stress_reaction": ["Замри"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["text"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Запиши, что ты чувствуешь прямо сейчас. Не оценивай, просто опиши. Что в теле? Что в мыслях?",
+        "audio_url": null,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.79,
+        "avg_stress_reduction": 1.9
+      }
+    },
+    {
+      "technique_id": 12,
+      "title": "Алгоритм принятия решения",
+      "slug": "decision-algorithm",
+      "description": "Разбей проблему на шаги: определи, собери факты, выдели 3 варианта, оцени, выбери.",
+      "scientific_basis": "Структурированный анализ снижает когнитивную нагрузку и тревогу (Kahneman, 2011).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["work", "practical"],
+        "psychotypes": ["Аналитик"],
+        "stress_reaction": ["Замри"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "medium",
+        "is_premium": false
+      },
+      "content": {
+        "text": "1. Определи проблему. 2. Собери факты. 3. Выдели 3 варианта. 4. Оцени каждый по критериям. 5. Выбери лучший.",
+        "audio_url": null,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.3,
+        "completion_rate": 0.76,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 13,
+      "title": "Короткий звонок поддержки",
+      "slug": "quick-support-call",
+      "description": "Позвони другу или подруге на 2 минуты. Скажи: «Мне нужна поддержка».",
+      "scientific_basis": "Социальная поддержка снижает кортизол и активирует окситоциновую систему (Uvnäs-Moberg, 2003).",
+      "tags": {
+        "level": ["yellow"],
+        "context": ["psychosocial", "social"],
+        "psychotypes": ["Лидер Мнений"],
+        "stress_reaction": ["Коммуницируй"],
+        "trimester": ["any"],
+        "format": ["interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Позвони другу или подруге. Скажи: «Мне нужна поддержка на 2 минуты». Просто поговори.",
+        "audio_url": null,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.72,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 14,
+      "title": "Планирование дня",
+      "slug": "daily-planning",
+      "description": "Составь чёткий план на завтра с приоритетами. Что можно делегировать?",
+      "scientific_basis": "Планирование снижает тревогу через предсказуемость и контроль (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["green"],
+        "context": ["practical", "work"],
+        "psychotypes": ["Прагматик", "Консерватор"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Запиши 3 главные задачи на завтра. Расставь приоритеты. Что можно делегировать?",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.85,
+        "avg_stress_reduction": 1.5
+      }
+    },
+    {
+      "technique_id": 15,
+      "title": "Дневник благодарности",
+      "slug": "gratitude-journal",
+      "description": "Запиши 3 вещи, за которые ты благодарна сегодня. Мелочи тоже считаются.",
+      "scientific_basis": "Практика благодарности повышает субъективное благополучие и снижает депрессию (Emmons & McCullough, 2003).",
+      "tags": {
+        "level": ["green"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Запиши 3 вещи, за которые ты благодарна сегодня. Мелочи тоже считаются.",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.7,
+        "completion_rate": 0.88,
+        "avg_stress_reduction": 1.4
+      }
+    },
+    {
+      "technique_id": 16,
+      "title": "Медитация любящей доброты",
+      "slug": "loving-kindness-meditation",
+      "description": "Направь тёплые мысли на себя, близких и всех людей. Пожелай им счастья.",
+      "scientific_basis": "Медитация любящей доброты повышает эмпатию и снижает негативные эмоции (Fredrickson et al., 2008).",
+      "tags": {
+        "level": ["green"],
+        "context": ["any"],
+        "psychotypes": ["Эмпат", "Лидер Мнений"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["audio"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Пожелай себе счастья. Пожелай счастья близким. Пожелай счастья всем людям.",
+        "audio_url": "/media/techniques/16_audio.mp3",
+        "audio_duration_seconds": 600,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.70,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 17,
+      "title": "Работа с ценностями (ACT)",
+      "slug": "values-work-act",
+      "description": "Определи, что для тебя действительно важно в материнстве. Как ты можешь жить в соответствии с этим сегодня?",
+      "scientific_basis": "Ясность ценностей повышает психологическую гибкость и снижает стресс (Hayes et al., 2006).",
+      "tags": {
+        "level": ["green"],
+        "context": ["psychosocial"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "6-12m"],
+        "format": ["text", "interactive"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Что для тебя важно в материнстве? Запиши 3 ценности. Как ты можешь жить в соответствии с ними сегодня?",
+        "audio_url": null,
+        "timer_seconds": 900
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.65,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 18,
+      "title": "Когнитивная реструктуризация (CBT)",
+      "slug": "cognitive-restructuring-cbt",
+      "description": "Оспорь негативную мысль: какие есть доказательства за и против? Какой более сбалансированный взгляд?",
+      "scientific_basis": "Когнитивная реструктуризация снижает тревогу и депрессию (Beck, 1979).",
+      "tags": {
+        "level": ["green"],
+        "context": ["conflict", "psychosocial"],
+        "psychotypes": ["Аналитик", "Консерватор"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["text", "interactive"],
+        "duration": "medium",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Запиши негативную мысль. Какие доказательства ЗА неё? Какие ПРОТИВ? Какой более сбалансированный взгляд?",
+        "audio_url": null,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.2,
+        "completion_rate": 0.74,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 19,
+      "title": "Майндфулнес-сканирование тела",
+      "slug": "body-scan-mindfulness",
+      "description": "Пройди вниманием от макушки до стоп. Замечай ощущения без оценки.",
+      "scientific_basis": "Майндфулнес-сканирование тела снижает стресс и улучшает интероцепцию (Kabat-Zinn, 1990).",
+      "tags": {
+        "level": ["green"],
+        "context": ["sleep", "physical"],
+        "psychotypes": ["Эмпат", "Эстет"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["audio"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Закрой глаза. Пройди вниманием от макушки до стоп. Замечай ощущения без оценки.",
+        "audio_url": "/media/techniques/19_audio.mp3",
+        "audio_duration_seconds": 900,
+        "timer_seconds": 900
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.68,
+        "avg_stress_reduction": 1.9
+      }
+    },
+    {
+      "technique_id": 20,
+      "title": "Техника «Стоп-мысль»",
+      "slug": "stop-thought-technique",
+      "description": "Когда ловишь негативную мысль, скажи себе «Стоп» и переключи внимание на дыхание.",
+      "scientific_basis": "Когнитивная остановка прерывает автоматические негативные мысли (Beck, 1979).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Когда ловишь негативную мысль, скажи себе «Стоп». Переключи внимание на дыхание на 1 минуту.",
+        "audio_url": null,
+        "timer_seconds": 60
+      },
+      "metadata": {
+        "popularity_score": 4.3,
+        "completion_rate": 0.82,
+        "avg_stress_reduction": 1.5
+      }
+    },
+    {
+      "technique_id": 21,
+      "title": "Чек-лист подготовки к родам",
+      "slug": "birth-preparation-checklist",
+      "description": "Пошаговая инструкция: что взять в роддом, что обсудить с врачом, какие документы нужны.",
+      "scientific_basis": "Подготовка снижает тревогу через предсказуемость (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["medical", "practical"],
+        "psychotypes": ["Консерватор", "Прагматик"],
+        "stress_reaction": ["any"],
+        "trimester": ["3"],
+        "format": ["text"],
+        "duration": "medium",
+        "is_premium": false
+      },
+      "content": {
+        "text": "✓ Документы: паспорт, полис, обменная карта, родовой сертификат. ✓ Вещи: халат, тапочки, гигиена. ✓ Обсуди с врачом: план родов, обезболивание.",
+        "audio_url": null,
+        "timer_seconds": null
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.87,
+        "avg_stress_reduction": 2.0
+      }
+    },
+    {
+      "technique_id": 22,
+      "title": "Дыхание для сна",
+      "slug": "sleep-breathing",
+      "description": "Медленное дыхание с удлинённым выдохом. Вдох на 3 счёта, выдох на 6. Повтори 10 раз.",
+      "scientific_basis": "Удлинение выдоха активирует парасимпатическую систему и улучшает засыпание (Jerath et al., 2015).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["sleep"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["audio", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Ляг удобно. Вдохни на 3 счёта. Выдохни на 6 счётов. Повтори 10 раз.",
+        "audio_url": "/media/techniques/22_audio.mp3",
+        "audio_duration_seconds": 120,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.7,
+        "completion_rate": 0.91,
+        "avg_stress_reduction": 2.2
+      }
+    },
+    {
+      "technique_id": 23,
+      "title": "Техника «Контейнирование»",
+      "slug": "containment-technique",
+      "description": "Представь контейнер, в который можно положить тревожные мысли. Закрой его и отложи до завтра.",
+      "scientific_basis": "Контейнирование снижает когнитивную перегрузку и улучшает сон (Linehan, 1993).",
+      "tags": {
+        "level": ["yellow"],
+        "context": ["sleep", "psychosocial"],
+        "psychotypes": ["Эмпат", "Аналитик"],
+        "stress_reaction": ["Замри"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Представь контейнер. Положи в него тревожные мысли. Закрой его. Отложи до завтра. Ты справишься.",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.80,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 24,
+      "title": "Техника «Безопасное место» (аудио)",
+      "slug": "safe-place-audio",
+      "description": "Аудио-гид по созданию внутреннего безопасного места. Тёплый голос, мягкая музыка.",
+      "scientific_basis": "Аудио-гиды усиливают эффект визуализации через мультисенсорное вовлечение (Holmes et al., 2008).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["psychosocial"],
+        "psychotypes": ["Эмпат", "Эстет"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m"],
+        "format": ["audio"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Закрой глаза. Представь место, где тебе безопасно. Что ты видишь? Что слышишь? Что чувствуешь?",
+        "audio_url": "/media/techniques/24_audio.mp3",
+        "audio_duration_seconds": 300,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.8,
+        "completion_rate": 0.83,
+        "avg_stress_reduction": 2.1
+      }
+    },
+    {
+      "technique_id": 25,
+      "title": "Техника «Якорь спокойствия»",
+      "slug": "calm-anchor-technique",
+      "description": "Создай якорь: сожми кулак, когда чувствуешь спокойствие. Используй якорь в стрессе.",
+      "scientific_basis": "Якорение через классическое обусловливание создаёт быстрый доступ к ресурсному состоянию (Bandler & Grinder, 1975).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["Прагматик", "Индивидуалист"],
+        "stress_reaction": ["Бей"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Вспомни момент спокойствия. Сожми кулак. Почувствуй спокойствие. Используй якорь в стрессе.",
+        "audio_url": null,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.3,
+        "completion_rate": 0.77,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 26,
+      "title": "Техника «Письмо себе»",
+      "slug": "letter-to-self",
+      "description": "Напиши письмо себе из будущего. Что бы ты сказала себе через год?",
+      "scientific_basis": "Письмо из будущего повышает самоэффективность и снижает тревогу (King, 2001).",
+      "tags": {
+        "level": ["green"],
+        "context": ["psychosocial"],
+        "psychotypes": ["Эмпат", "Лидер Мнений"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "6-12m"],
+        "format": ["text"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Напиши письмо себе из будущего. Что бы ты сказала себе через год? Какие советы дала бы?",
+        "audio_url": null,
+        "timer_seconds": 900
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.69,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 27,
+      "title": "Техника «5 минут тишины»",
+      "slug": "five-minutes-silence",
+      "description": "Просто посиди в тишине 5 минут. Без телефона, без мыслей. Просто будь.",
+      "scientific_basis": "Кратковременная тишина снижает кортизол и восстанавливает когнитивный ресурс (Khalfa et al., 2002).",
+      "tags": {
+        "level": ["green"],
+        "context": ["any"],
+        "psychotypes": ["Аналитик", "Эмпат"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["timer"],
+        "duration": "medium",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Сядь удобно. Закрой глаза. Просто посиди в тишине 5 минут. Без телефона, без мыслей.",
+        "audio_url": null,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.2,
+        "completion_rate": 0.73,
+        "avg_stress_reduction": 1.5
+      }
+    },
+    {
+      "technique_id": 28,
+      "title": "Техника «Ресурсный круг»",
+      "slug": "resource-circle",
+      "description": "Представь круг вокруг себя, наполненный силой и спокойствием. Войди в него.",
+      "scientific_basis": "Визуализация ресурсных состояний повышает самоэффективность (Bandler & Grinder, 1975).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["Инноватор", "Лидер Мнений"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Представь круг вокруг себя. Наполни его силой и спокойствием. Войди в него. Почувствуй ресурс.",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.79,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 29,
+      "title": "Техника «Переформулирование»",
+      "slug": "reframing-technique",
+      "description": "Переформулируй проблему: «Как я могу посмотреть на это иначе?»",
+      "scientific_basis": "Когнитивное переформулирование снижает эмоциональный заряд ситуации (Ellis, 1962).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["conflict", "psychosocial"],
+        "psychotypes": ["Аналитик", "Консерватор"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "medium",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Переформулируй проблему: «Как я могу посмотреть на это иначе?» Запиши 3 альтернативных взгляда.",
+        "audio_url": null,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.3,
+        "completion_rate": 0.76,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 30,
+      "title": "Техника «Благодарность телу»",
+      "slug": "body-gratitude",
+      "description": "Поблагодари своё тело за то, что оно делает для тебя и ребёнка.",
+      "scientific_basis": "Благодарность телу повышает принятие себя и снижает тревогу (Piran, 2016).",
+      "tags": {
+        "level": ["green"],
+        "context": ["physical", "psychosocial"],
+        "psychotypes": ["Эмпат", "Эстет"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "0-3m"],
+        "format": ["text", "audio"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Поблагодари своё тело за то, что оно делает для тебя и ребёнка. За что ты благодарна своему телу?",
+        "audio_url": "/media/techniques/30_audio.mp3",
+        "audio_duration_seconds": 300,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.81,
+        "avg_stress_reduction": 1.9
+      }
+    },
+    {
+      "technique_id": 31,
+      "title": "Техника «Дыхание с визуализацией»",
+      "slug": "breathing-with-visualization",
+      "description": "На вдохе представь, как вдыхаешь спокойствие. На выдохе — как отпускаешь напряжение.",
+      "scientific_basis": "Комбинация дыхания и визуализации усиливает парасимпатический ответ (Jerath et al., 2015).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["Эстет", "Эмпат"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["audio", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "На вдохе представь, как вдыхаешь спокойствие. На выдохе — как отпускаешь напряжение. Повтори 10 раз.",
+        "audio_url": "/media/techniques/31_audio.mp3",
+        "audio_duration_seconds": 120,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.84,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 32,
+      "title": "Техника «Мини-медитация»",
+      "slug": "mini-meditation",
+      "description": "3 минуты осознанного дыхания. Просто наблюдай за дыханием, не меняя его.",
+      "scientific_basis": "Кратковременная медитация снижает стресс и улучшает фокус (Goyal et al., 2014).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["audio", "timer"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Сядь удобно. Закрой глаза. Просто наблюдай за дыханием, не меняя его. 3 минуты.",
+        "audio_url": "/media/techniques/32_audio.mp3",
+        "audio_duration_seconds": 180,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.86,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 33,
+      "title": "Техника «Список ресурсов»",
+      "slug": "resources-list",
+      "description": "Запиши 5 людей, мест или занятий, которые дают тебе силу. Используй список в стрессе.",
+      "scientific_basis": "Активация ресурсов повышает самоэффективность и снижает тревогу (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["green"],
+        "context": ["any"],
+        "psychotypes": ["Прагматик", "Консерватор"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": false
+      },
+      "content": {
+        "text": "Запиши 5 людей, мест или занятий, которые дают тебе силу. Используй список в стрессе.",
+        "audio_url": null,
+        "timer_seconds": 180
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.83,
+        "avg_stress_reduction": 1.6
+      }
+    },
+    {
+      "technique_id": 34,
+      "title": "Техника «Прогрессивная релаксация (полная)»",
+      "slug": "full-pmr",
+      "description": "Полная прогрессивная мышечная релаксация: от стоп до макушки. 15 минут.",
+      "scientific_basis": "Полная ПМР снижает мышечное напряжение и тревогу (Jacobson, 1938).",
+      "tags": {
+        "level": ["green"],
+        "context": ["sleep", "physical"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["audio"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Начни со стоп. Напряги на 5 секунд. Расслабь. Переходи вверх: икры, бёдра, живот, руки, плечи, лицо.",
+        "audio_url": "/media/techniques/34_audio.mp3",
+        "audio_duration_seconds": 900,
+        "timer_seconds": 900
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.71,
+        "avg_stress_reduction": 2.0
+      }
+    },
+    {
+      "technique_id": 35,
+      "title": "Техника «Манифест намерений»",
+      "slug": "intentions-manifesto",
+      "description": "Напиши манифест: какие намерения ты хочешь воплотить на этой неделе?",
+      "scientific_basis": "Формулирование намерений повышает мотивацию и снижает тревогу (Gollwitzer, 1999).",
+      "tags": {
+        "level": ["green"],
+        "context": ["any"],
+        "psychotypes": ["Инноватор", "Лидер Мнений"],
+        "stress_reaction": ["any"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Напиши манифест: какие намерения ты хочешь воплотить на этой неделе? Запиши 3 намерения.",
+        "audio_url": null,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.75,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 36,
+      "title": "Силовой сброс напряжения",
+      "slug": "power-release",
+      "description": "Комплекс из 5 движений для быстрого сброса напряжения: потянись, сожми кулаки, потряси руками, глубоко вдохни, расслабься.",
+      "scientific_basis": "Короткие физические интервенции снижают уровень кортизола и активируют парасимпатическую систему через соматический путь (Payne et al., 2015).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["any"],
+        "psychotypes": ["Индивидуалист"],
+        "stress_reaction": ["Бей"],
+        "trimester": ["1", "2", "3-6m"],
+        "format": ["video", "timer"],
+        "duration": "short",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Встань. 1. Потянись вверх на 5 секунд. 2. Сожми кулаки и напряги всё тело. 3. Потряси руками и ногами 10 секунд. 4. Глубокий вдох. 5. Полное расслабление.",
+        "audio_url": "/media/techniques/36_audio.mp3",
+        "video_url": "/media/techniques/36_video.mp4",
+        "audio_duration_seconds": 120,
+        "timer_seconds": 120
+      },
+      "metadata": {
+        "popularity_score": 4.5,
+        "completion_rate": 0.80,
+        "avg_stress_reduction": 1.9
+      }
+    },
+    {
+      "technique_id": 37,
+      "title": "Ментальная карта стрессора",
+      "slug": "stressor-mind-map",
+      "description": "Разложи стрессор на части: факты, эмоции, действия. Построй схему и увидь ситуацию целиком.",
+      "scientific_basis": "Визуальная структуризация снижает когнитивную нагрузку и активирует префронтальную кору (Sweller, 2011).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["conflict", "psychosocial", "work"],
+        "psychotypes": ["Аналитик"],
+        "stress_reaction": ["Замри"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "В центре — твой стрессор. Вокруг — 3 ветви: 1) Факты (что реально происходит). 2) Эмоции (что я чувствую). 3) Действия (что я могу сделать). Заполни каждую.",
+        "audio_url": null,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.4,
+        "completion_rate": 0.74,
+        "avg_stress_reduction": 1.8
+      }
+    },
+    {
+      "technique_id": 38,
+      "title": "Оперативный план восстановления",
+      "slug": "recovery-plan",
+      "description": "Составь чёткий план на ближайшие 24 часа: 3 приоритета, 3 делегирования, 1 награда себе.",
+      "scientific_basis": "Краткосрочное планирование восстанавливает чувство контроля и снижает тревогу (Lazarus & Folkman, 1984).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["practical", "work", "physical"],
+        "psychotypes": ["Прагматик"],
+        "stress_reaction": ["Бей"],
+        "trimester": ["any"],
+        "format": ["text", "interactive"],
+        "duration": "short",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Заполни план: 1) 3 главные задачи на 24 часа (только они). 2) 3 дела, которые можно делегировать. 3) 1 награда себе за день (маленькая, но приятная).",
+        "audio_url": null,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.6,
+        "completion_rate": 0.85,
+        "avg_stress_reduction": 1.7
+      }
+    },
+    {
+      "technique_id": 39,
+      "title": "Ритуал стабильности",
+      "slug": "stability-ritual",
+      "description": "Создай свой ежедневный ритуал из 5 повторяющихся действий: утро, день, вечер. Это твой якорь предсказуемости.",
+      "scientific_basis": "Ритуалы снижают тревогу через создание предсказуемости и активируют систему вознаграждения (Boyes, 2019).",
+      "tags": {
+        "level": ["yellow", "green"],
+        "context": ["sleep", "psychosocial", "practical"],
+        "psychotypes": ["Консерватор"],
+        "stress_reaction": ["Сливайся с толпой"],
+        "trimester": ["any"],
+        "format": ["audio", "text"],
+        "duration": "medium",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Составь свой ритуал: 1) Утреннее действие (например, стакан воды + 3 глубоких вдоха). 2) Дневное (прогулка 10 минут). 3) Вечернее (чай + 5 минут тишины). Повторяй каждый день.",
+        "audio_url": "/media/techniques/39_audio.mp3",
+        "audio_duration_seconds": 300,
+        "timer_seconds": 300
+      },
+      "metadata": {
+        "popularity_score": 4.7,
+        "completion_rate": 0.82,
+        "avg_stress_reduction": 2.0
+      }
+    }
+  ]
+}
