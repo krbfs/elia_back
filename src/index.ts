@@ -10,7 +10,7 @@ import {
   type TechniqueRow,
   type UserRow,
 } from './db.js';
-import { pickTechnique, serializeTechnique, stressZone } from './recommend.js';
+import { recommendTechniques, serializeTechnique, stressZone } from './recommend.js';
 import { ensureCatalogSeeded, getAdminSummary } from './seed/loadCatalog.js';
 import {
   authenticateDevUser,
@@ -18,6 +18,13 @@ import {
   refreshAuth,
 } from './auth/service.js';
 import { requireAuth, type AuthedRequest } from './auth/middleware.js';
+import {
+  calculatePsychotype,
+  calculateSubjectivePsychotype,
+  getCachedQuestions,
+  scoreFromAnswers,
+} from './psychotype/index.js';
+import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
 import { partnerTipsForType } from './partner/tips.js';
 import { scoreEpdsAnswers } from './epds/score.js';
 import {
@@ -40,19 +47,7 @@ app.use(express.json());
 
 function serializeProfile(row: ProfileRow | undefined, vkUserId: number) {
   return {
-    vk_user_id: row?.vk_user_id ?? vkUserId,
-    trimester: row?.trimester ?? null,
-    onboarding_completed: Boolean(row?.onboarding_completed),
-    base_type: row?.base_type ?? null,
-    secondary_type: row?.secondary_type ?? null,
-    scores_json: row?.scores_json ?? null,
-    platform: row?.platform ?? null,
-    last_stress: row?.last_stress ?? null,
-    techniques_completed: row?.techniques_completed ?? 0,
-    crisis_level: row?.crisis_level ?? 'green',
-    epds_score: row?.epds_score ?? null,
-    epds_completed_at: row?.epds_completed_at ?? null,
-    is_premium: Boolean(row?.is_premium),
+    ...enrichProfileResponse(row, vkUserId),
     daily_techniques_used: getDailyUsage(row).count,
     daily_techniques_remaining: getDailyUsage(row).remaining,
     daily_techniques_limit: FREE_DAILY_EMERGENCY_LIMIT,
@@ -160,6 +155,84 @@ app.post('/users/sync', async (req, res) => {
   res.json({ user });
 });
 
+app.get('/questions', async (_req, res) => {
+  try {
+    const questions = await getCachedQuestions();
+    res.json({
+      questions: questions.map((question) => ({
+        number: question.question_number,
+        context: question.context,
+        text: question.text,
+        options: question.options.map((option) => ({
+          id: option.id,
+          text: option.text,
+        })),
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to load questions',
+    });
+  }
+});
+
+app.post('/calculate-psychotype', async (req, res) => {
+  const { vk_user_id, answers, sliders, save_profile, mode } = req.body ?? {};
+
+  if (!Array.isArray(answers) || answers.length !== 10) {
+    res.status(400).json({ error: 'answers must be an array of 10 option indexes' });
+    return;
+  }
+
+  if (
+    answers.some(
+      (value) => typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 2,
+    )
+  ) {
+    res.status(400).json({ error: 'each answer must be 0, 1, or 2' });
+    return;
+  }
+
+  try {
+    const questions = await getCachedQuestions();
+    const raw = scoreFromAnswers(answers, questions);
+    const result =
+      mode === 'subjective'
+        ? calculateSubjectivePsychotype(raw)
+        : calculatePsychotype(raw, sliders ?? {});
+    const payload = serializePsychotypeResult(result);
+
+    if (save_profile) {
+      if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+        res.status(400).json({ error: 'vk_user_id required when save_profile=true' });
+        return;
+      }
+
+      await query(
+        `INSERT INTO users (vk_user_id) VALUES ($1)
+         ON CONFLICT (vk_user_id) DO UPDATE SET updated_at = NOW()`,
+        [vk_user_id],
+      );
+      await savePsychotypeProfile(vk_user_id, result);
+      const saved = await queryOne<ProfileRow>(
+        'SELECT * FROM profiles WHERE vk_user_id = $1',
+        [vk_user_id],
+      );
+      res.json({
+        profile: payload,
+        saved: serializeProfile(saved, vk_user_id),
+      });
+      return;
+    }
+
+    res.json({ profile: payload });
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Failed to calculate psychotype',
+    });
+  }
+});
+
 app.get('/profile', async (req, res) => {
   const vkUserId = Number(req.query.vk_user_id);
   if (!Number.isFinite(vkUserId)) {
@@ -171,6 +244,26 @@ app.get('/profile', async (req, res) => {
     'SELECT * FROM profiles WHERE vk_user_id = $1',
     [vkUserId],
   );
+
+  res.json({ profile: serializeProfile(row, vkUserId) });
+});
+
+app.get('/profile/:vk_user_id', async (req, res) => {
+  const vkUserId = Number(req.params.vk_user_id);
+  if (!Number.isFinite(vkUserId)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const row = await queryOne<ProfileRow>(
+    'SELECT * FROM profiles WHERE vk_user_id = $1',
+    [vkUserId],
+  );
+
+  if (!row) {
+    res.status(404).json({ error: 'Profile not found' });
+    return;
+  }
 
   res.json({ profile: serializeProfile(row, vkUserId) });
 });
@@ -263,9 +356,13 @@ app.post('/profile', async (req, res) => {
   res.json({ profile: serializeProfile(row, vk_user_id) });
 });
 
-app.get('/techniques/recommend', async (req, res) => {
+app.get('/techniques/recommend', handleRecommend);
+app.get('/recommendations', handleRecommend);
+
+async function handleRecommend(req: express.Request, res: express.Response) {
   const vkUserId = Number(req.query.vk_user_id);
-  const stress = Number(req.query.stress);
+  const stress = Number(req.query.stress ?? req.query.stress_level);
+  const context = typeof req.query.context === 'string' ? req.query.context : null;
 
   if (!Number.isFinite(vkUserId)) {
     res.status(400).json({ error: 'vk_user_id required' });
@@ -286,7 +383,7 @@ app.get('/techniques/recommend', async (req, res) => {
     return;
   }
 
-  let zone = stressZone(stress);
+  const zone = stressZone(stress);
   const access = canUseTechnique(profile, zone);
   if (!access.allowed) {
     res.status(402).json({
@@ -297,38 +394,26 @@ app.get('/techniques/recommend', async (req, res) => {
     return;
   }
 
-  if (profile?.crisis_level === 'yellow' && zone === 'green') {
-    zone = 'yellow';
-  }
+  const allTechniques = await queryAll<TechniqueRow>('SELECT * FROM techniques');
+  const recommendation = recommendTechniques(allTechniques, {
+    stress,
+    profile,
+    context,
+  });
 
-  const pool = await queryAll<TechniqueRow>(
-    'SELECT * FROM techniques WHERE level = $1',
-    [zone],
-  );
-
-  const technique = pickTechnique(pool, profile, 'base_type');
-  if (!technique) {
+  if (!recommendation.technique) {
     res.status(404).json({ error: 'No technique found for zone' });
     return;
   }
 
-  let cascade = null;
-  if (zone === 'yellow' && profile?.secondary_type) {
-    const cascadePick = pickTechnique(pool, profile, 'secondary_type', {
-      maxDuration: 120,
-    });
-    if (cascadePick && cascadePick.id !== technique.id) {
-      cascade = serializeTechnique(cascadePick);
-    }
-  }
-
   res.json({
-    zone,
+    zone: recommendation.zone,
     stress,
-    technique: serializeTechnique(technique),
-    cascade,
+    technique: serializeTechnique(recommendation.technique),
+    cascade: recommendation.cascade ? serializeTechnique(recommendation.cascade) : null,
+    techniques: recommendation.techniques.map(serializeTechnique),
   });
-});
+}
 
 app.post('/techniques/complete', async (req, res) => {
   const { vk_user_id, stress } = req.body ?? {};

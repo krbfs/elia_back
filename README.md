@@ -31,7 +31,8 @@ Health: http://localhost:3001/health
 - `GET /admin/summary` — счётчики таблиц (ENABLE_ADMIN=true)
 - `POST /users/sync`
 - `GET/POST/DELETE /profile`
-- `GET /techniques/recommend`
+- `GET /techniques/recommend` — `{ vk_user_id, stress, context? }` → technique + cascade + top-5
+- `GET /recommendations` — alias (`stress_level` вместо `stress`)
 - `POST /techniques/complete`
 - `GET/POST/DELETE /favorites`
 - `GET/POST /partner/*`
@@ -43,6 +44,24 @@ Health: http://localhost:3001/health
 ```bash
 npm run load-data          # 39 техник + 10 вопросов из data/*.json
 npm run load-data -- --force
-npx tsx scripts/stage1_check.ts
+npm run stage1-check
 python3 scripts/validate_catalog.py
 ```
+
+## Диагностика (этап 2)
+
+```bash
+npm test -- src/psychotype/psychotype.test.ts
+npm run stage2-check
+```
+
+## Рекомендации (этап 3)
+
+```bash
+npm test -- src/recommend.test.ts
+npm run stage3-check
+```
+
+- `GET /questions` — 10 вопросов из БД (без весов)
+- `POST /calculate-psychotype` — `{ answers: number[10], sliders?: {}, save_profile?: boolean, vk_user_id?: number }`
+- `GET /profile?vk_user_id=` — сохранённый профиль

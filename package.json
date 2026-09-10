@@ -7,7 +7,10 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "test": "vitest run",
-    "load-data": "tsx scripts/load_elia_data.ts"
+    "load-data": "tsx scripts/load_elia_data.ts",
+    "stage1-check": "tsx scripts/stage1_check.ts",
+    "stage2-check": "tsx scripts/stage2_check.ts",
+    "stage3-check": "tsx scripts/stage3_check.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
