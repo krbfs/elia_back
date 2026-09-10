@@ -59,6 +59,8 @@ export async function initDb() {
 
     CREATE TABLE IF NOT EXISTS techniques (
       id SERIAL PRIMARY KEY,
+      catalog_id INTEGER UNIQUE,
+      slug TEXT,
       title TEXT NOT NULL,
       text TEXT NOT NULL,
       duration_sec INTEGER NOT NULL,
@@ -68,6 +70,51 @@ export async function initDb() {
       psychotypes_json TEXT NOT NULL DEFAULT '[]',
       reaction TEXT,
       evidence TEXT,
+      is_premium BOOLEAN NOT NULL DEFAULT FALSE,
+      tags_json TEXT NOT NULL DEFAULT '{}',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS questions (
+      question_number INTEGER PRIMARY KEY,
+      context TEXT NOT NULL,
+      text TEXT NOT NULL,
+      options_json TEXT NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'active',
+      started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      amount INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'RUB',
+      status TEXT NOT NULL DEFAULT 'pending',
+      vk_payment_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      completed_at TIMESTAMPTZ
+    );
+
+    CREATE TABLE IF NOT EXISTS crisis_incidents (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      trigger_type TEXT NOT NULL,
+      trigger_value TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
+      token_hash TEXT PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      expires_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
@@ -89,11 +136,18 @@ export async function initDb() {
       partner_self_scores_json TEXT,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
+    ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
+    ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE techniques ADD COLUMN IF NOT EXISTS tags_json TEXT NOT NULL DEFAULT '{}';
   `);
 }
 
 export type TechniqueRow = {
   id: number;
+  catalog_id: number | null;
+  slug: string | null;
   title: string;
   text: string;
   duration_sec: number;
@@ -103,6 +157,8 @@ export type TechniqueRow = {
   psychotypes_json: string;
   reaction: string;
   evidence: string;
+  is_premium: boolean;
+  tags_json: string;
   created_at: Date | string;
 };
 

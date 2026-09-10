@@ -25,6 +25,10 @@ Health: http://localhost:3001/health
 ## Основные эндпоинты
 
 - `GET /health`
+- `POST /auth/verify-vk-token` — VK access_token → JWT
+- `POST /auth/refresh` — обновление JWT
+- `POST /auth/dev-login` — локальный вход (ALLOW_DEV_AUTH=true)
+- `GET /admin/summary` — счётчики таблиц (ENABLE_ADMIN=true)
 - `POST /users/sync`
 - `GET/POST/DELETE /profile`
 - `GET /techniques/recommend`
@@ -33,3 +37,12 @@ Health: http://localhost:3001/health
 - `GET/POST /partner/*`
 - `POST /epds`
 - `POST /premium/activate`
+
+## Данные (этап 1)
+
+```bash
+npm run load-data          # 39 техник + 10 вопросов из data/*.json
+npm run load-data -- --force
+npx tsx scripts/stage1_check.ts
+python3 scripts/validate_catalog.py
+```

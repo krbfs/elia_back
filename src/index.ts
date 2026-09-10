@@ -11,7 +11,13 @@ import {
   type UserRow,
 } from './db.js';
 import { pickTechnique, serializeTechnique, stressZone } from './recommend.js';
-import { seedTechniques } from './seed/run.js';
+import { ensureCatalogSeeded, getAdminSummary } from './seed/loadCatalog.js';
+import {
+  authenticateDevUser,
+  authenticateWithVkToken,
+  refreshAuth,
+} from './auth/service.js';
+import { requireAuth, type AuthedRequest } from './auth/middleware.js';
 import { partnerTipsForType } from './partner/tips.js';
 import { scoreEpdsAnswers } from './epds/score.js';
 import {
@@ -60,6 +66,65 @@ app.get('/health', async (_req, res) => {
   } catch {
     res.status(503).json({ ok: false, service: 'elia-api', database: 'unavailable' });
   }
+});
+
+app.post('/auth/verify-vk-token', async (req, res) => {
+  const { access_token } = req.body ?? {};
+  if (typeof access_token !== 'string' || !access_token.trim()) {
+    res.status(400).json({ error: 'access_token required' });
+    return;
+  }
+
+  try {
+    const tokens = await authenticateWithVkToken(access_token);
+    res.json(tokens);
+  } catch (error) {
+    res.status(401).json({
+      error: error instanceof Error ? error.message : 'Invalid VK token',
+    });
+  }
+});
+
+app.post('/auth/refresh', async (req, res) => {
+  const { refresh_token } = req.body ?? {};
+  if (typeof refresh_token !== 'string' || !refresh_token.trim()) {
+    res.status(400).json({ error: 'refresh_token required' });
+    return;
+  }
+
+  try {
+    const tokens = await refreshAuth(refresh_token);
+    res.json(tokens);
+  } catch (error) {
+    res.status(401).json({
+      error: error instanceof Error ? error.message : 'Invalid refresh token',
+    });
+  }
+});
+
+app.post('/auth/dev-login', async (req, res) => {
+  if (process.env.ALLOW_DEV_AUTH !== 'true') {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  const { vk_user_id, first_name, last_name } = req.body ?? {};
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const tokens = await authenticateDevUser({ vk_user_id, first_name, last_name });
+  res.json(tokens);
+});
+
+app.get('/admin/summary', requireAuth, async (_req, res) => {
+  if (process.env.ENABLE_ADMIN !== 'true') {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  res.json({ summary: await getAdminSummary() });
 });
 
 app.post('/users/sync', async (req, res) => {
@@ -645,7 +710,7 @@ app.post('/premium/activate', async (req, res) => {
 
 async function main() {
   await initDb();
-  await seedTechniques();
+  await ensureCatalogSeeded();
 
   app.listen(port, () => {
     console.log(`Elia API http://localhost:${port}`);
