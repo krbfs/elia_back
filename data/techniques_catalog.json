@@ -1,7 +1,7 @@
 {
   "version": "1.1",
   "updated_at": "2026-08-31",
-  "total_techniques": 39,
+  "total_techniques": 40,
   "premium_techniques": 15,
   "metadata": {
     "description": "Каталог техник для MVP приложения «Элия» (обновлённая версия)",
@@ -1079,6 +1079,34 @@
         "popularity_score": 4.7,
         "completion_rate": 0.82,
         "avg_stress_reduction": 2.0
+      }
+    },
+    {
+      "technique_id": 40,
+      "title": "Аудио-медитация «Тихая гавань»",
+      "slug": "quiet-haven-meditation",
+      "description": "10-минутная аудио-медитация для глубокого восстановления. Тёплый голос, мягкая музыка, образ безопасного места.",
+      "scientific_basis": "Управляемая медитация снижает кортизол и активирует парасимпатическую систему (Goyal et al., 2014).",
+      "tags": {
+        "level": ["green"],
+        "context": ["sleep", "psychosocial"],
+        "psychotypes": ["any"],
+        "stress_reaction": ["any"],
+        "trimester": ["2", "3", "3-6m", "6-12m"],
+        "format": ["audio"],
+        "duration": "long",
+        "is_premium": true
+      },
+      "content": {
+        "text": "Закрой глаза. Представь тихую гавань, где тебя ждут покой и тепло. Слушай голос, который ведёт тебя.",
+        "audio_url": "/media/techniques/40_audio.mp3",
+        "audio_duration_seconds": 600,
+        "timer_seconds": 600
+      },
+      "metadata": {
+        "popularity_score": 4.7,
+        "completion_rate": 0.72,
+        "avg_stress_reduction": 2.1
       }
     }
   ]

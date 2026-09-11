@@ -44,7 +44,7 @@ async function main() {
   const loadStats = await loadEliaData({});
   const summary = await getAdminSummary();
   add(
-    '39 техник в БД',
+    '40 техник в БД',
     summary.techniques === 39,
     `techniques=${summary.techniques}, created=${loadStats.techniquesCreated}, updated=${loadStats.techniquesUpdated}`,
   );

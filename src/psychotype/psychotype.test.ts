@@ -81,7 +81,8 @@ describe('psychotype stage 2', () => {
   });
 
   it('TC-102: conservative matrix from questionnaire JSON', () => {
-    const answers = answersForDominantTraits(questions, ['tr', 'sen']);
+    // Калибровано под MaxPossible NAVIGATOR; tr=13 sen=12 → tr/sen топ-2
+    const answers = [2, 2, 2, 0, 0, 1, 1, 1, 0, 0];
     const raw = scoreFromAnswers(answers, questions);
     const result = calculatePsychotype(raw);
 

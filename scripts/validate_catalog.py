@@ -528,11 +528,20 @@ def validate_questionnaire(file_path: Path, report: ValidationReport) -> Dict[st
                 report.add_error(f"{opt_prefix}: сумма весов = 0 (должна быть > 0)")
             elif total_weight > 10:
                 report.add_warning(f"{opt_prefix}: сумма весов = {total_weight} (обычно 3-6)")
-            
-            # Обновляем фактические максимумы
+        
+        # Фактический максимум по вопросу = max веса trait среди 3 вариантов
+        question_max = {trait: 0 for trait in VALID_TRAITS}
+        for option in options:
+            if not isinstance(option, dict):
+                continue
+            weights = option.get('weights', {})
+            if not isinstance(weights, dict):
+                continue
             for trait, weight in weights.items():
-                if trait in stats['actual_max']:
-                    stats['actual_max'][trait] += weight
+                if trait in question_max and isinstance(weight, int):
+                    question_max[trait] = max(question_max[trait], weight)
+        for trait, weight in question_max.items():
+            stats['actual_max'][trait] += weight
     
     # Проверка, что фактические максимумы совпадают с заявленными
     if max_possible:

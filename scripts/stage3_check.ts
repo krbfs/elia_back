@@ -33,7 +33,7 @@ async function main() {
   });
 
   console.log('\n=== ЭТАП 3: проверка ===\n');
-  console.log(`${techniques.length >= 39 ? '✅' : '❌'} techniques in DB: ${techniques.length}`);
+  console.log(`${techniques.length >= 40 ? '✅' : '❌'} techniques in DB: ${techniques.length}`);
   console.log(`${red.zone === 'red' ? '✅' : '❌'} stress 9 → red (${red.technique?.title ?? 'none'})`);
   console.log(`${yellow.cascade ? '✅' : '⚠️ '} yellow cascade: ${yellow.cascade?.title ?? 'none'}`);
   console.log(`${(yellow.techniques.length ?? 0) >= 1 ? '✅' : '❌'} top list size: ${yellow.techniques.length}`);
