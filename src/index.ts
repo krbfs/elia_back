@@ -40,6 +40,7 @@ import {
 import { logCrisisIncident } from './crisis/incidents.js';
 import { recordStressLevel } from './crisis/recordStress.js';
 import { hasSustainedHighStress } from './crisis/stressLog.js';
+import { logTechniqueUsage, parseStressLevel } from './technique/usage.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
@@ -443,10 +444,21 @@ async function handleRecommend(req: express.Request, res: express.Response) {
 }
 
 app.post('/techniques/complete', async (req, res) => {
-  const { vk_user_id, stress } = req.body ?? {};
+  const { vk_user_id, technique_id, stress_before, stress_after, stress } = req.body ?? {};
 
   if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
     res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  if (typeof technique_id !== 'number' || !Number.isFinite(technique_id)) {
+    res.status(400).json({ error: 'technique_id must be a number' });
+    return;
+  }
+
+  const stressAfter = parseStressLevel(stress_after ?? stress);
+  if (stressAfter === null) {
+    res.status(400).json({ error: 'stress_after must be a number between 1 and 10' });
     return;
   }
 
@@ -455,37 +467,65 @@ app.post('/techniques/complete', async (req, res) => {
     [vk_user_id],
   );
 
-  const nextStress =
-    typeof stress === 'number' && stress >= 1 && stress <= 10
-      ? stress
-      : (existing?.last_stress ?? null);
+  const stressBefore =
+    parseStressLevel(stress_before) ??
+    parseStressLevel(existing?.last_stress) ??
+    null;
+
+  if (stressBefore === null) {
+    res.status(400).json({ error: 'stress_before must be a number between 1 and 10' });
+    return;
+  }
+
+  const technique = await queryOne<TechniqueRow>(
+    'SELECT id FROM techniques WHERE id = $1',
+    [technique_id],
+  );
+  if (!technique) {
+    res.status(404).json({ error: 'Technique not found' });
+    return;
+  }
+
+  const usage = await logTechniqueUsage({
+    vkUserId: vk_user_id,
+    techniqueId: technique_id,
+    stressBefore,
+    stressAfter,
+  });
+
   const nextCompleted = (existing?.techniques_completed ?? 0) + 1;
 
   if (existing) {
     await query(
       `UPDATE profiles SET last_stress = $1, techniques_completed = $2, updated_at = NOW()
        WHERE vk_user_id = $3`,
-      [nextStress, nextCompleted, vk_user_id],
+      [stressAfter, nextCompleted, vk_user_id],
     );
   } else {
     await query(
       `INSERT INTO profiles (vk_user_id, last_stress, techniques_completed) VALUES ($1, $2, $3)`,
-      [vk_user_id, nextStress, nextCompleted],
+      [vk_user_id, stressAfter, nextCompleted],
     );
   }
 
   await incrementDailyUsage(vk_user_id, existing);
-
-  if (typeof nextStress === 'number') {
-    await recordStressLevel(vk_user_id, nextStress);
-  }
+  await recordStressLevel(vk_user_id, stressAfter);
 
   const updated = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
     [vk_user_id],
   );
 
-  res.json({ profile: await buildProfileResponse(updated, vk_user_id) });
+  res.json({
+    profile: await buildProfileResponse(updated, vk_user_id),
+    usage: {
+      id: usage.id,
+      technique_id: usage.technique_id,
+      stress_before: usage.stress_before,
+      stress_after: usage.stress_after,
+      zone: usage.zone,
+    },
+  });
 });
 
 app.get('/techniques/:id', async (req, res) => {
@@ -907,6 +947,7 @@ app.delete('/profile', async (req, res) => {
   }
 
   await query('DELETE FROM favorites WHERE vk_user_id = $1', [vk_user_id]);
+  await query('DELETE FROM technique_usage WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM stress_log WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM crisis_incidents WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM partner_profiles WHERE user_vk_id = $1', [vk_user_id]);

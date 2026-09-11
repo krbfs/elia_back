@@ -247,7 +247,7 @@ export async function ensureCatalogSeeded() {
 }
 
 export async function getAdminSummary() {
-  const [users, profiles, techniques, questions, subscriptions, payments, crisis] =
+  const [users, profiles, techniques, questions, subscriptions, payments, crisis, usage] =
     await Promise.all([
       queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM users'),
       queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM profiles'),
@@ -256,6 +256,7 @@ export async function getAdminSummary() {
       queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM subscriptions'),
       queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM payments'),
       queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM crisis_incidents'),
+      queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM technique_usage'),
     ]);
 
   return {
@@ -266,5 +267,6 @@ export async function getAdminSummary() {
     subscriptions: Number(subscriptions?.count ?? 0),
     payments: Number(payments?.count ?? 0),
     crisis_incidents: Number(crisis?.count ?? 0),
+    technique_usage: Number(usage?.count ?? 0),
   };
 }

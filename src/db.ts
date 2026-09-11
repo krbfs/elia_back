@@ -149,6 +149,19 @@ export async function initDb() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS technique_usage (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      technique_id INTEGER NOT NULL REFERENCES techniques(id) ON DELETE CASCADE,
+      stress_before INTEGER NOT NULL CHECK (stress_before BETWEEN 1 AND 10),
+      stress_after INTEGER NOT NULL CHECK (stress_after BETWEEN 1 AND 10),
+      zone TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_technique_usage_user_created
+      ON technique_usage (vk_user_id, created_at DESC);
+
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
@@ -216,4 +229,14 @@ export type UserRow = {
   last_name: string | null;
   created_at: Date | string;
   updated_at: Date | string;
+};
+
+export type TechniqueUsageRow = {
+  id: number;
+  vk_user_id: number;
+  technique_id: number;
+  stress_before: number;
+  stress_after: number;
+  zone: string | null;
+  created_at: Date | string;
 };

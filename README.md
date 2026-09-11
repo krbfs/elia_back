@@ -33,7 +33,7 @@ Health: http://localhost:3001/health
 - `GET/POST/DELETE /profile`
 - `GET /techniques/recommend` — `{ vk_user_id, stress, context? }` → technique + cascade + top-5
 - `GET /recommendations` — alias (`stress_level` вместо `stress`)
-- `POST /techniques/complete`
+- `POST /techniques/complete` — `{ vk_user_id, technique_id, stress_before, stress_after }` → profile + запись в `technique_usage`
 - `GET/POST/DELETE /favorites`
 - `GET/POST /partner/*`
 - `POST /epds`
