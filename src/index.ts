@@ -991,10 +991,13 @@ app.post('/premium/activate', async (req, res) => {
 
 async function main() {
   await initDb();
-  await ensureCatalogSeeded();
 
   app.listen(port, () => {
     console.log(`Elia API http://localhost:${port}`);
+  });
+
+  ensureCatalogSeeded().catch((error) => {
+    console.error('Catalog seed failed:', error);
   });
 }
 

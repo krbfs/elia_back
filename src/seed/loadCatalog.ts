@@ -7,6 +7,9 @@ const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '../../data');
 const TECHNIQUES_FILE = join(DATA_DIR, 'techniques_catalog.json');
 const QUESTIONNAIRE_FILE = join(DATA_DIR, 'questionnaire_full.json');
 
+export const EXPECTED_TECHNIQUE_COUNT = 40;
+export const EXPECTED_QUESTION_COUNT = 10;
+
 const DURATION_SEC: Record<string, number> = {
   short: 90,
   medium: 180,
@@ -231,14 +234,14 @@ export async function ensureCatalogSeeded() {
   const techniques = Number(techniquesCount?.count ?? 0);
   const questions = Number(questionsCount?.count ?? 0);
 
-  if (techniques !== 39) {
+  if (techniques !== EXPECTED_TECHNIQUE_COUNT) {
     const stats = await loadTechniquesFromCatalog({ force: techniques > 0 });
     console.log(
       `Catalog techniques: created=${stats.techniquesCreated}, updated=${stats.techniquesUpdated}`,
     );
   }
 
-  if (questions !== 10) {
+  if (questions !== EXPECTED_QUESTION_COUNT) {
     const stats = await loadQuestionsFromCatalog({ force: questions > 0 });
     console.log(
       `Catalog questions: created=${stats.questionsCreated}, updated=${stats.questionsUpdated}`,
