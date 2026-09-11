@@ -4,6 +4,7 @@ import type { ProfileRow } from './db.js';
 import {
   isPremiumLocked,
   isRedZoneBlocked,
+  isYellowComplexTechniqueBlocked,
   recommendTechniques,
   scoreTechnique,
   stressZone,
@@ -185,6 +186,166 @@ describe('recommend stage 3', () => {
     expect(scoreTechnique(pool[1], 'Эмпат', null)).toBeGreaterThan(
       scoreTechnique(pool[0], 'Эмпат', null),
     );
+  });
+
+  it('complex profile returns only universal psychotype techniques', () => {
+    const pool = [
+      technique({
+        id: 1,
+        title: 'Universal',
+        level: 'yellow',
+        psychotypes_json: '["any"]',
+        duration_sec: 60,
+      }),
+      technique({
+        id: 2,
+        title: 'For Empath',
+        level: 'yellow',
+        psychotypes_json: '["Эмпат"]',
+        duration_sec: 60,
+      }),
+    ];
+
+    const result = recommendTechniques(pool, {
+      stress: 6,
+      profile: profile({
+        vk_user_id: 1,
+        base_type: 'Эмпат',
+        is_premium: true,
+        scores_json: JSON.stringify({
+          normalized: { agr: 1, sp: 1, ex: 1, lab: 1, tr: 1, sen: 1, in: 1, rig: 1 },
+          raw: { agr: 1, sp: 1, ex: 1, lab: 1, tr: 1, sen: 1, in: 1, rig: 1 },
+          triad_status: 'complex',
+          conflict_profile: true,
+        }),
+      }),
+    });
+
+    expect(result.technique?.title).toBe('Universal');
+    expect(result.techniques.every((item) => item.title === 'Universal')).toBe(true);
+  });
+
+  it('context sleep prefers matching techniques', () => {
+    const pool = [
+      technique({
+        id: 1,
+        title: 'Sleep help',
+        level: 'green',
+        psychotypes_json: '["any"]',
+        tags_json: JSON.stringify({ context: ['sleep'], stress_reaction: ['any'], trimester: ['any'] }),
+      }),
+      technique({
+        id: 2,
+        title: 'Work help',
+        level: 'green',
+        psychotypes_json: '["any"]',
+        tags_json: JSON.stringify({ context: ['work'], stress_reaction: ['any'], trimester: ['any'] }),
+      }),
+    ];
+
+    const result = recommendTechniques(pool, {
+      stress: 3,
+      context: 'sleep',
+      profile: profile({ vk_user_id: 1, base_type: 'Эмпат', is_premium: true }),
+    });
+
+    expect(result.technique?.title).toBe('Sleep help');
+  });
+
+  it('trimester tag filters techniques', () => {
+    const early = technique({
+      id: 1,
+      title: 'Trimester 1',
+      level: 'green',
+      psychotypes_json: '["any"]',
+      tags_json: JSON.stringify({ trimester: ['1'], stress_reaction: ['any'], context: ['any'] }),
+    });
+    const late = technique({
+      id: 2,
+      title: 'Trimester 3',
+      level: 'green',
+      psychotypes_json: '["any"]',
+      tags_json: JSON.stringify({ trimester: ['3'], stress_reaction: ['any'], context: ['any'] }),
+    });
+
+    const result = recommendTechniques([early, late], {
+      stress: 3,
+      profile: profile({
+        vk_user_id: 1,
+        base_type: 'Эмпат',
+        trimester: 'trimester_1',
+        is_premium: true,
+      }),
+    });
+
+    expect(result.technique?.title).toBe('Trimester 1');
+  });
+
+  it('stress reaction match boosts score', () => {
+    const empathPool = [
+      technique({
+        id: 1,
+        title: 'Freeze',
+        level: 'yellow',
+        psychotypes_json: '["any"]',
+        tags_json: JSON.stringify({ stress_reaction: ['Замри'], context: ['any'], trimester: ['any'] }),
+      }),
+      technique({
+        id: 2,
+        title: 'Fight',
+        level: 'yellow',
+        psychotypes_json: '["any"]',
+        tags_json: JSON.stringify({ stress_reaction: ['Бей'], context: ['any'], trimester: ['any'] }),
+      }),
+    ];
+
+    expect(
+      scoreTechnique(empathPool[0], 'Эмпат', 'trimester_2', { stressReaction: 'Замри' }),
+    ).toBeGreaterThan(scoreTechnique(empathPool[1], 'Эмпат', 'trimester_2', { stressReaction: 'Замри' }));
+
+    const result = recommendTechniques(empathPool, {
+      stress: 6,
+      profile: profile({
+        vk_user_id: 1,
+        base_type: 'Эмпат',
+        trimester: 'trimester_2',
+        is_premium: true,
+      }),
+    });
+    expect(result.technique?.title).toBe('Freeze');
+  });
+
+  it('yellow crisis blocks complex mindfulness-like techniques', () => {
+    const pool = [
+      technique({
+        id: 1,
+        title: 'Simple grounding',
+        level: 'yellow',
+        psychotypes_json: '["any"]',
+      }),
+      technique({
+        id: 2,
+        title: 'Mindfulness pause',
+        level: 'yellow',
+        psychotypes_json: '["any"]',
+        evidence: 'Mindfulness based stress reduction',
+      }),
+    ];
+
+    expect(isYellowComplexTechniqueBlocked(pool[1], 'yellow')).toBe(true);
+    expect(isYellowComplexTechniqueBlocked(pool[0], 'yellow')).toBe(false);
+
+    const result = recommendTechniques(pool, {
+      stress: 6,
+      profile: profile({
+        vk_user_id: 1,
+        base_type: 'Эмпат',
+        crisis_level: 'yellow',
+        is_premium: true,
+      }),
+    });
+
+    expect(result.technique?.title).toBe('Simple grounding');
   });
 
   it('returns top-5 techniques', () => {

@@ -26,6 +26,10 @@ import {
 } from './psychotype/index.js';
 import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
 import { partnerTipsForType } from './partner/tips.js';
+import {
+  createPartnerInvite,
+  validatePartnerInvite,
+} from './partner/invite.js';
 import { scoreEpdsAnswers } from './epds/score.js';
 import {
   FREE_DAILY_EMERGENCY_LIMIT,
@@ -33,6 +37,9 @@ import {
   getDailyUsage,
   incrementDailyUsage,
 } from './billing/usage.js';
+import { logCrisisIncident } from './crisis/incidents.js';
+import { recordStressLevel } from './crisis/recordStress.js';
+import { hasSustainedHighStress } from './crisis/stressLog.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
@@ -56,12 +63,17 @@ app.use(
 );
 app.use(express.json());
 
-function serializeProfile(row: ProfileRow | undefined, vkUserId: number) {
+async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: number) {
+  const greenNudge =
+    row?.crisis_level === 'green' ? await hasSustainedHighStress(vkUserId) : false;
+
   return {
     ...enrichProfileResponse(row, vkUserId),
     daily_techniques_used: getDailyUsage(row).count,
     daily_techniques_remaining: getDailyUsage(row).remaining,
     daily_techniques_limit: FREE_DAILY_EMERGENCY_LIMIT,
+    green_nudge: greenNudge,
+    green_nudge_reason: greenNudge ? ('sustained_stress_3d' as const) : null,
   };
 }
 
@@ -231,7 +243,7 @@ app.post('/calculate-psychotype', async (req, res) => {
       );
       res.json({
         profile: payload,
-        saved: serializeProfile(saved, vk_user_id),
+        saved: await buildProfileResponse(saved, vk_user_id),
       });
       return;
     }
@@ -256,7 +268,7 @@ app.get('/profile', async (req, res) => {
     [vkUserId],
   );
 
-  res.json({ profile: serializeProfile(row, vkUserId) });
+  res.json({ profile: await buildProfileResponse(row, vkUserId) });
 });
 
 app.get('/profile/:vk_user_id', async (req, res) => {
@@ -276,7 +288,7 @@ app.get('/profile/:vk_user_id', async (req, res) => {
     return;
   }
 
-  res.json({ profile: serializeProfile(row, vkUserId) });
+  res.json({ profile: await buildProfileResponse(row, vkUserId) });
 });
 
 app.post('/profile', async (req, res) => {
@@ -364,7 +376,11 @@ app.post('/profile', async (req, res) => {
     [vk_user_id],
   );
 
-  res.json({ profile: serializeProfile(row, vk_user_id) });
+  if (typeof nextLastStress === 'number') {
+    await recordStressLevel(vk_user_id, nextLastStress);
+  }
+
+  res.json({ profile: await buildProfileResponse(row, vk_user_id) });
 });
 
 app.get('/techniques/recommend', handleRecommend);
@@ -460,12 +476,16 @@ app.post('/techniques/complete', async (req, res) => {
 
   await incrementDailyUsage(vk_user_id, existing);
 
+  if (typeof nextStress === 'number') {
+    await recordStressLevel(vk_user_id, nextStress);
+  }
+
   const updated = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
     [vk_user_id],
   );
 
-  res.json({ profile: serializeProfile(updated, vk_user_id) });
+  res.json({ profile: await buildProfileResponse(updated, vk_user_id) });
 });
 
 app.get('/techniques/:id', async (req, res) => {
@@ -552,8 +572,34 @@ function serializePartner(row: PartnerProfileRow | undefined, userVkId: number) 
     partner_self_base_type: row?.partner_self_base_type ?? null,
     partner_self_secondary_type: row?.partner_self_secondary_type ?? null,
     partner_self_scores_json: row?.partner_self_scores_json ?? null,
+    invite_token: row?.invite_token ?? null,
+    invite_expires_at: row?.invite_expires_at ?? null,
   };
 }
+
+app.post('/partner/invite', async (req, res) => {
+  const { vk_user_id } = req.body ?? {};
+
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const invite = await createPartnerInvite(vk_user_id);
+  res.json(invite);
+});
+
+app.get('/partner/invite/validate', async (req, res) => {
+  const token = typeof req.query.token === 'string' ? req.query.token : '';
+
+  if (!token) {
+    res.status(400).json({ error: 'token required' });
+    return;
+  }
+
+  const validation = await validatePartnerInvite(token);
+  res.json(validation);
+});
 
 app.get('/partner', async (req, res) => {
   const userVkId = Number(req.query.vk_user_id);
@@ -627,18 +673,33 @@ app.post('/partner/self', async (req, res) => {
   const {
     partner_vk_id,
     linked_user_vk_id,
+    invite_token,
     partner_self_base_type,
     partner_self_secondary_type,
     partner_self_scores_json,
   } = req.body ?? {};
 
-  if (
-    typeof partner_vk_id !== 'number' ||
-    typeof linked_user_vk_id !== 'number' ||
-    !Number.isFinite(partner_vk_id) ||
-    !Number.isFinite(linked_user_vk_id)
-  ) {
-    res.status(400).json({ error: 'partner_vk_id and linked_user_vk_id required' });
+  if (typeof partner_vk_id !== 'number' || !Number.isFinite(partner_vk_id)) {
+    res.status(400).json({ error: 'partner_vk_id required' });
+    return;
+  }
+
+  let resolvedLinkedUserId = linked_user_vk_id;
+
+  if (typeof invite_token === 'string' && invite_token.trim()) {
+    const validation = await validatePartnerInvite(invite_token.trim());
+    if (!validation.valid) {
+      res.status(validation.expired ? 410 : 404).json({
+        error: validation.reason,
+        expired: validation.expired,
+      });
+      return;
+    }
+    resolvedLinkedUserId = validation.linked_user_vk_id;
+  }
+
+  if (typeof resolvedLinkedUserId !== 'number' || !Number.isFinite(resolvedLinkedUserId)) {
+    res.status(400).json({ error: 'invite_token or linked_user_vk_id required' });
     return;
   }
 
@@ -648,12 +709,12 @@ app.post('/partner/self', async (req, res) => {
   );
   await query(
     'INSERT INTO users (vk_user_id) VALUES ($1) ON CONFLICT DO NOTHING',
-    [linked_user_vk_id],
+    [resolvedLinkedUserId],
   );
 
   const existing = await queryOne<PartnerProfileRow>(
     'SELECT * FROM partner_profiles WHERE user_vk_id = $1',
-    [linked_user_vk_id],
+    [resolvedLinkedUserId],
   );
 
   if (existing) {
@@ -667,7 +728,7 @@ app.post('/partner/self', async (req, res) => {
         partner_self_base_type ?? null,
         partner_self_secondary_type ?? null,
         partner_self_scores_json ?? null,
-        linked_user_vk_id,
+        resolvedLinkedUserId,
       ],
     );
   } else {
@@ -677,7 +738,7 @@ app.post('/partner/self', async (req, res) => {
         partner_self_secondary_type, partner_self_scores_json
       ) VALUES ($1, $2, $3, $4, $5)`,
       [
-        linked_user_vk_id,
+        resolvedLinkedUserId,
         partner_vk_id,
         partner_self_base_type ?? null,
         partner_self_secondary_type ?? null,
@@ -688,10 +749,10 @@ app.post('/partner/self', async (req, res) => {
 
   const row = await queryOne<PartnerProfileRow>(
     'SELECT * FROM partner_profiles WHERE user_vk_id = $1',
-    [linked_user_vk_id],
+    [resolvedLinkedUserId],
   );
 
-  res.json({ partner: serializePartner(row, linked_user_vk_id) });
+  res.json({ partner: serializePartner(row, resolvedLinkedUserId) });
 });
 
 app.get('/partner/tips', async (req, res) => {
@@ -710,6 +771,74 @@ app.get('/partner/tips', async (req, res) => {
   res.json({ base_type: profile?.base_type ?? null, tips });
 });
 
+app.post('/crisis/incidents', async (req, res) => {
+  const { vk_user_id, trigger_type, trigger_value, actions_taken } = req.body ?? {};
+
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+  if (typeof trigger_type !== 'string' || !trigger_type.trim()) {
+    res.status(400).json({ error: 'trigger_type required' });
+    return;
+  }
+
+  const actions = Array.isArray(actions_taken)
+    ? actions_taken.filter((item): item is string => typeof item === 'string')
+    : [];
+
+  await logCrisisIncident(
+    vk_user_id,
+    trigger_type,
+    typeof trigger_value === 'string' ? trigger_value : null,
+    actions,
+  );
+
+  res.json({ ok: true });
+});
+
+app.post('/stress/report', async (req, res) => {
+  const { vk_user_id, stress } = req.body ?? {};
+
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+  if (typeof stress !== 'number' || stress < 1 || stress > 10) {
+    res.status(400).json({ error: 'stress must be 1–10' });
+    return;
+  }
+
+  await recordStressLevel(vk_user_id, stress);
+
+  const existing = await queryOne<ProfileRow>(
+    'SELECT * FROM profiles WHERE vk_user_id = $1',
+    [vk_user_id],
+  );
+
+  if (existing) {
+    await query(
+      'UPDATE profiles SET last_stress = $1, updated_at = NOW() WHERE vk_user_id = $2',
+      [stress, vk_user_id],
+    );
+  } else {
+    await query(
+      'INSERT INTO profiles (vk_user_id, last_stress) VALUES ($1, $2)',
+      [vk_user_id, stress],
+    );
+  }
+
+  const row = await queryOne<ProfileRow>(
+    'SELECT * FROM profiles WHERE vk_user_id = $1',
+    [vk_user_id],
+  );
+
+  res.json({
+    profile: await buildProfileResponse(row, vk_user_id),
+    crisis_redirect: stress >= 9 ? 'red' : null,
+  });
+});
+
 app.post('/epds', async (req, res) => {
   const { vk_user_id, answers } = req.body ?? {};
 
@@ -719,7 +848,7 @@ app.post('/epds', async (req, res) => {
   }
 
   try {
-    const { total, crisisLevel } = scoreEpdsAnswers(answers);
+    const { total, crisisLevel, q10Score } = scoreEpdsAnswers(answers);
     const existing = await queryOne<ProfileRow>(
       'SELECT * FROM profiles WHERE vk_user_id = $1',
       [vk_user_id],
@@ -745,10 +874,23 @@ app.post('/epds', async (req, res) => {
       [vk_user_id],
     );
 
+    if (crisisLevel === 'red') {
+      await logCrisisIncident(vk_user_id, 'epds_red', String(total), [
+        'set_crisis_red',
+        'redirect_crisis',
+        `q10=${q10Score}`,
+      ]);
+    } else if (crisisLevel === 'yellow') {
+      await logCrisisIncident(vk_user_id, 'epds_yellow', String(total), [
+        'set_crisis_yellow',
+        'block_complex_techniques',
+      ]);
+    }
+
     res.json({
       epds_score: total,
       crisis_level: crisisLevel,
-      profile: serializeProfile(row, vk_user_id),
+      profile: await buildProfileResponse(row, vk_user_id),
     });
   } catch (error) {
     res.status(400).json({
@@ -765,6 +907,8 @@ app.delete('/profile', async (req, res) => {
   }
 
   await query('DELETE FROM favorites WHERE vk_user_id = $1', [vk_user_id]);
+  await query('DELETE FROM stress_log WHERE vk_user_id = $1', [vk_user_id]);
+  await query('DELETE FROM crisis_incidents WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM partner_profiles WHERE user_vk_id = $1', [vk_user_id]);
   await query('DELETE FROM profiles WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM users WHERE vk_user_id = $1', [vk_user_id]);
@@ -801,7 +945,7 @@ app.post('/premium/activate', async (req, res) => {
     [vk_user_id],
   );
 
-  res.json({ profile: serializeProfile(row, vk_user_id) });
+  res.json({ profile: await buildProfileResponse(row, vk_user_id) });
 });
 
 async function main() {

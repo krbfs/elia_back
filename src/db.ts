@@ -108,7 +108,17 @@ export async function initDb() {
       vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
       trigger_type TEXT NOT NULL,
       trigger_value TEXT,
+      actions_taken TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS stress_log (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      stress_level INTEGER NOT NULL,
+      logged_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (vk_user_id, logged_date)
     );
 
     CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
@@ -134,6 +144,8 @@ export async function initDb() {
       partner_self_base_type TEXT,
       partner_self_secondary_type TEXT,
       partner_self_scores_json TEXT,
+      invite_token TEXT UNIQUE,
+      invite_expires_at TIMESTAMPTZ,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
@@ -141,6 +153,9 @@ export async function initDb() {
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS tags_json TEXT NOT NULL DEFAULT '{}';
+    ALTER TABLE crisis_incidents ADD COLUMN IF NOT EXISTS actions_taken TEXT;
+    ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS invite_token TEXT UNIQUE;
+    ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS invite_expires_at TIMESTAMPTZ;
   `);
 }
 
@@ -171,6 +186,8 @@ export type PartnerProfileRow = {
   partner_self_base_type: string | null;
   partner_self_secondary_type: string | null;
   partner_self_scores_json: string | null;
+  invite_token: string | null;
+  invite_expires_at: Date | string | null;
   updated_at: Date | string;
 };
 
