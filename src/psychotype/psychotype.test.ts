@@ -280,7 +280,7 @@ describe('psychotype v4.3', () => {
     const byRing = calculatePsychotype({ ...zero, tr: 16, rig: 16 });
     expect(byRing.base_traits).toEqual(['tr', 'rig']);
     expect(info).toHaveBeenCalledWith(
-      expect.stringContaining('неоднозначность между Тревожность и Ригидность'),
+      expect.stringContaining('неоднозначность между Тревожность и Структурность и порядок'),
     );
     info.mockRestore();
   });

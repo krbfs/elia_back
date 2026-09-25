@@ -643,11 +643,13 @@ app.post('/gift/:token/activate', async (req, res) => {
     const status =
       activation.reason === 'expired'
         ? 410
-        : activation.reason === 'used'
+        : activation.reason === 'used' || activation.reason === 'duplicate'
           ? 409
-          : activation.reason === 'own_gift'
-            ? 400
-            : 404;
+          : activation.reason === 'limit_reached'
+            ? 429
+            : activation.reason === 'own_gift'
+              ? 400
+              : 404;
     res.status(status).json({ error: activation.reason });
     return;
   }

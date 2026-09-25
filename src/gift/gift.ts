@@ -8,6 +8,8 @@ import type { TechniqueGiftRow } from '../db.js';
  */
 export const GIFT_TOKEN_TTL_DAYS = 7;
 export const GIFT_ACCESS_DAYS = 7;
+/** Лимит одновременно открытых подарком техник у одного получателя (ответы 25.09, п. 12). */
+export const GIFT_MAX_ACTIVE_PER_RECIPIENT = 3;
 
 export type GiftValidation =
   | { valid: true; gift: TechniqueGiftRow }
@@ -15,7 +17,10 @@ export type GiftValidation =
 
 export type GiftActivation =
   | { ok: true; technique_id: number; access_expires_at: string }
-  | { ok: false; reason: 'not_found' | 'expired' | 'used' | 'own_gift' };
+  | {
+      ok: false;
+      reason: 'not_found' | 'expired' | 'used' | 'own_gift' | 'limit_reached' | 'duplicate';
+    };
 
 export function generateGiftToken(): string {
   return crypto.randomBytes(16).toString('hex');
@@ -98,6 +103,19 @@ export async function activateGift(
   const { gift } = validation;
   // Подарок себе не даёт доступа: иначе премиум открывается в один клик.
   if (gift.sender_vk_id === recipientVkId) return { ok: false, reason: 'own_gift' };
+
+  // Ограничения против цепочек подарков (ответы 25.09, п. 12).
+  const active = await activeGiftsFor(recipientVkId);
+  if (active.length >= GIFT_MAX_ACTIVE_PER_RECIPIENT) {
+    return { ok: false, reason: 'limit_reached' };
+  }
+  const duplicate = await queryOne<{ id: number }>(
+    `SELECT id FROM technique_gifts
+     WHERE recipient_vk_id = $1 AND sender_vk_id = $2 AND technique_id = $3
+       AND activated_at IS NOT NULL`,
+    [recipientVkId, gift.sender_vk_id, gift.technique_id],
+  );
+  if (duplicate) return { ok: false, reason: 'duplicate' };
 
   await query(
     'INSERT INTO users (vk_user_id) VALUES ($1) ON CONFLICT (vk_user_id) DO NOTHING',

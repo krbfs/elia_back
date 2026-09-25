@@ -17,7 +17,7 @@ export const TRAIT_LABELS: Record<TraitKey, string> = {
   tr: 'Тревожность',
   sen: 'Чувствительность',
   in: 'Интроверсия',
-  rig: 'Ригидность',
+  rig: 'Структурность и порядок',
 };
 
 export const MAX_POSSIBLE: Record<TraitKey, number> = {

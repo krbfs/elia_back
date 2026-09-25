@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   GIFT_ACCESS_DAYS,
+  GIFT_MAX_ACTIVE_PER_RECIPIENT,
   GIFT_TOKEN_TTL_DAYS,
   generateGiftToken,
   giftAccessExpiresAt,
@@ -34,5 +35,9 @@ describe('«Подари технику» (§9.4)', () => {
       isGiftAccessActive({ access_expires_at: '2026-09-25T09:59:59.000Z' }, now),
     ).toBe(false);
     expect(isGiftAccessActive({ access_expires_at: giftAccessExpiresAt(now) }, now)).toBe(true);
+  });
+
+  it('лимит активных подарков у получателя — 3 (ответы 25.09, п. 12)', () => {
+    expect(GIFT_MAX_ACTIVE_PER_RECIPIENT).toBe(3);
   });
 });
