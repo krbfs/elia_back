@@ -27,10 +27,14 @@ import {
 } from './psychotype/index.js';
 import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
 import {
+  PARTNER_AVOID_PHRASES,
+  PARTNER_PREMIUM_PREVIEW,
   PARTNER_PRINCIPLES,
-  PARTNER_TIPS_PAYWALL,
+  PARTNER_SUPPORT_PHRASES,
   partnerTipsForType,
+  situationalTipsForType,
 } from './partner/tips.js';
+import { partnerTipsAccess } from './partner/access.js';
 import {
   createPartnerInvite,
   validatePartnerInvite,
@@ -933,29 +937,25 @@ app.get('/partner/tips', async (req, res) => {
     return;
   }
 
-  const profile = await queryOne<{ base_type: string | null; is_premium: boolean }>(
-    'SELECT base_type, is_premium FROM profiles WHERE vk_user_id = $1',
+  const profile = await queryOne<{ base_type: string | null }>(
+    'SELECT base_type FROM profiles WHERE vk_user_id = $1',
     [userVkId],
   );
+  const baseType = profile?.base_type ?? null;
+  const access = await partnerTipsAccess(userVkId);
 
-  // Ответы методолога 25.09, п. 11: модуль подсказок — Premium, бесплатно только приглашение.
-  if (!profile?.is_premium) {
-    res.json({
-      base_type: profile?.base_type ?? null,
-      tips: null,
-      principles: [],
-      premium_required: true,
-      paywall: PARTNER_TIPS_PAYWALL,
-    });
-    return;
-  }
-
-  const tips = partnerTipsForType(profile?.base_type ?? null);
+  // Архитектура подсказок §2–3: Free — принципы и фразы, Premium — таблица типа и ситуации.
   res.json({
-    base_type: profile?.base_type ?? null,
-    tips,
+    base_type: baseType,
     principles: PARTNER_PRINCIPLES,
-    premium_required: false,
+    support_phrases: PARTNER_SUPPORT_PHRASES,
+    avoid_phrases: PARTNER_AVOID_PHRASES,
+    has_premium: access.has_premium,
+    premium_paid_by: access.paid_by,
+    tips: access.has_premium ? partnerTipsForType(baseType) : null,
+    situational_tips: access.has_premium ? situationalTipsForType(baseType) : [],
+    premium_required: !access.has_premium,
+    premium_preview: access.has_premium ? null : PARTNER_PREMIUM_PREVIEW,
   });
 });
 

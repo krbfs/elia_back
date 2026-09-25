@@ -22,11 +22,81 @@ export type PartnerPrinciple = {
 };
 
 /**
- * Заглушка для бесплатного доступа (ответы методолога 25.09, п. 11).
- * `[Имя]` подставляет фронт; бесплатно остаётся только отправка приглашения.
+ * Архитектура подсказок партнёру §2–3: Free — принципы и фразы, Premium — таблица
+ * своего психотипа и ситуативные советы. `[Имя]` подставляет фронт.
  */
 export const PARTNER_TIPS_PAYWALL =
   'Откройте Premium, чтобы получить персональные подсказки, как поддерживать [Имя] на основе её психотипа, не нарушая личных границ';
+
+export const PARTNER_PREMIUM_PREVIEW = {
+  title: PARTNER_TIPS_PAYWALL,
+  description: 'Узнай, какие техники подходят именно ей, и как говорить, чтобы она слышала',
+  items: [
+    '4 конкретных действия «Что делать»',
+    '4 пункта «Чего избегать»',
+    'Ключевая фраза поддержки',
+    'Ситуативные советы для 5 типичных ситуаций',
+  ],
+  cta_text: 'Открыть Premium',
+};
+
+/** Free-уровень §2.1. Пока в документах есть только по три фразы из обещанных десяти. */
+export const PARTNER_SUPPORT_PHRASES: string[] = [
+  'Я вижу, как тебе сейчас непросто',
+  'Я рядом. Чем я могу помочь?',
+  'Ты делаешь достаточно',
+];
+
+export const PARTNER_AVOID_PHRASES: string[] = [
+  'Да ладно, всё нормально',
+  'Успокойся',
+  'Другим ещё хуже',
+];
+
+export type PartnerSituation = 'crying' | 'angry' | 'tired' | 'anxious' | 'silent';
+
+export const SITUATION_LABELS: Record<PartnerSituation, string> = {
+  crying: 'Она плачет',
+  angry: 'Она злится',
+  tired: 'Она устала',
+  anxious: 'Она тревожится',
+  silent: 'Она не хочет разговаривать',
+};
+
+export type SituationalTip = {
+  situation: PartnerSituation;
+  label: string;
+  advice: string;
+};
+
+function situationalTips(
+  advices: Record<PartnerSituation, string>,
+): SituationalTip[] {
+  return (Object.keys(SITUATION_LABELS) as PartnerSituation[]).map((situation) => ({
+    situation,
+    label: SITUATION_LABELS[situation],
+    advice: advices[situation],
+  }));
+}
+
+/**
+ * Premium-уровень §3.2. В документах пока расписан только Консерватор,
+ * остальные семь психотипов ждут контента от методолога.
+ */
+export const SITUATIONAL_TIPS_BY_TYPE: Record<string, SituationalTip[]> = {
+  Консерватор: situationalTips({
+    crying: 'Не спрашивай «Что случилось?» сразу. Дай 5 минут тишины, потом обними.',
+    angry: 'Не оправдывайся. Скажи: «Я понимаю, почему ты злишься. Что я могу сделать?»',
+    tired: 'Возьми ребёнка без напоминания. Скажи: «Иди полежи, я разберусь».',
+    anxious: 'Не говори «Всё будет хорошо». Скажи: «Давай вместе подумаем, что можно сделать».',
+    silent: 'Уважай молчание. Принеси чай и уйди.',
+  }),
+};
+
+export function situationalTipsForType(baseType: string | null): SituationalTip[] {
+  if (!baseType) return [];
+  return SITUATIONAL_TIPS_BY_TYPE[baseType] ?? [];
+}
 
 /** Пять универсальных правил, которые читают до таблицы своего типа. */
 export const PARTNER_PRINCIPLES: PartnerPrinciple[] = [
