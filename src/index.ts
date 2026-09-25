@@ -26,7 +26,11 @@ import {
   scoreFromAnswers,
 } from './psychotype/index.js';
 import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
-import { PARTNER_PRINCIPLES, partnerTipsForType } from './partner/tips.js';
+import {
+  PARTNER_PRINCIPLES,
+  PARTNER_TIPS_PAYWALL,
+  partnerTipsForType,
+} from './partner/tips.js';
 import {
   createPartnerInvite,
   validatePartnerInvite,
@@ -929,16 +933,29 @@ app.get('/partner/tips', async (req, res) => {
     return;
   }
 
-  const profile = await queryOne<{ base_type: string | null }>(
-    'SELECT base_type FROM profiles WHERE vk_user_id = $1',
+  const profile = await queryOne<{ base_type: string | null; is_premium: boolean }>(
+    'SELECT base_type, is_premium FROM profiles WHERE vk_user_id = $1',
     [userVkId],
   );
+
+  // Ответы методолога 25.09, п. 11: модуль подсказок — Premium, бесплатно только приглашение.
+  if (!profile?.is_premium) {
+    res.json({
+      base_type: profile?.base_type ?? null,
+      tips: null,
+      principles: [],
+      premium_required: true,
+      paywall: PARTNER_TIPS_PAYWALL,
+    });
+    return;
+  }
 
   const tips = partnerTipsForType(profile?.base_type ?? null);
   res.json({
     base_type: profile?.base_type ?? null,
     tips,
     principles: PARTNER_PRINCIPLES,
+    premium_required: false,
   });
 });
 
