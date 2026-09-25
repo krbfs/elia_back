@@ -37,6 +37,7 @@ describe('psychotype profile (stage 2.3)', () => {
       trimester: 'trimester_2',
       onboarding_completed: true,
       base_type: result.base_type,
+      psychotype_code: result.psychotype_code,
       secondary_type: result.secondary_type,
       scores_json: JSON.stringify(buildStoredPsychotype(result)),
       platform: 'web',

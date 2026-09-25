@@ -64,19 +64,16 @@ describe('psychotype stage 2', () => {
     });
   });
 
-  it('TC-101: full calculation returns base and secondary types', () => {
-    const answers = Array(10).fill(1);
-    const raw = scoreFromAnswers(answers, questions);
-    const baseTraits = resolveBaseTraits(normalizeScores(raw));
-    const sliders: Partial<Record<TraitKey, number>> = {
-      [baseTraits[0]]: 8,
-      [baseTraits[1]]: 7,
-    };
-    const result = calculatePsychotype(raw, sliders);
+  it('TC-101: Консерватор + Эмпат из целевых сырых баллов (03_Диагностика §8.1–8.2)', () => {
+    const raw: TraitScores = { agr: 2, sp: 1, ex: 1, lab: 2, tr: 14, sen: 13, in: 5, rig: 6 };
+    const result = calculatePsychotype(raw, { tr: 6, sen: 8 });
 
-    expect(result.base_type).toBeTruthy();
-    expect(result.secondary_type).toBeTruthy();
-    expect(result.base_traits).toEqual(baseTraits);
+    expect(result.base_type).toBe('Консерватор');
+    expect(result.psychotype_code).toBe('conservator');
+    expect(result.base_traits).toEqual(['tr', 'sen']);
+    expect(result.expression_level).toBe('выраженный');
+    expect(result.secondary_type).toBe('Эмпат');
+    expect(result.conflict_profile).toBe(false);
     expect(result.scores).toMatchObject(normalizeScores(raw));
   });
 
@@ -105,7 +102,7 @@ describe('psychotype stage 2', () => {
     expect(result.base_type).toBe(traitTypeName(baseFromQuestions[0], baseFromQuestions[1]));
   });
 
-  it('TC-104: antagonistic pair sets conflict_profile', () => {
+  it('TC-104: non-adjacent pair gives complex profile', () => {
     const raw: TraitScores = {
       agr: 18,
       sp: 0,
@@ -117,11 +114,12 @@ describe('psychotype stage 2', () => {
       rig: 0,
     };
     const result = calculatePsychotype(raw);
-    expect(result.conflict_profile).toBe(true);
-    expect(['conflict', 'complex']).toContain(result.triad_status);
+    expect(result.base_type).toBe('complex');
+    expect(result.psychotype_code).toBe('complex');
+    expect(result.expression_level).toBeNull();
   });
 
-  it('TC-105: impossible triad is resolved without crash', () => {
+  it('TC-105: conflict triad is saved with conflict flag', () => {
     const raw: TraitScores = {
       agr: 18,
       sp: 0,
@@ -136,8 +134,10 @@ describe('psychotype stage 2', () => {
     const result = calculatePsychotype(raw);
 
     expect(base).toHaveLength(2);
-    expect(result.base_type).toBeTruthy();
-    expect(result.triad_status).toBe('impossible');
+    expect(result.conflict_profile).toBe(true);
+    expect(result.triad_status).toBe('conflict');
+    expect(result.triad).toEqual(['agr', 'sen', 'tr']);
+    expect(result.recommendation).toBe('Пройдите опросник повторно в спокойном состоянии');
   });
 
   it('traitTypeName maps all 8 psychotypes', () => {

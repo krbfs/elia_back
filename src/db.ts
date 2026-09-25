@@ -43,6 +43,7 @@ export async function initDb() {
       trimester TEXT,
       onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
       base_type TEXT,
+      psychotype_code TEXT,
       secondary_type TEXT,
       scores_json TEXT,
       platform TEXT,
@@ -162,6 +163,7 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_technique_usage_user_created
       ON technique_usage (vk_user_id, created_at DESC);
 
+    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_code TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
@@ -209,6 +211,7 @@ export type ProfileRow = {
   trimester: string | null;
   onboarding_completed: boolean;
   base_type: string | null;
+  psychotype_code: string | null;
   secondary_type: string | null;
   scores_json: string | null;
   platform: string | null;

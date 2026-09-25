@@ -4,28 +4,36 @@ import type { PsychotypeResult } from './types.js';
 export type StoredPsychotype = {
   normalized: PsychotypeResult['scores'];
   raw: PsychotypeResult['raw_scores'];
+  psychotype_code: PsychotypeResult['psychotype_code'];
   top_traits: PsychotypeResult['top_traits'];
   base_traits: PsychotypeResult['base_traits'];
   secondary_traits: PsychotypeResult['secondary_traits'];
+  triad: PsychotypeResult['triad'];
   triad_status: PsychotypeResult['triad_status'];
   triad_variant: PsychotypeResult['triad_variant'];
   expression_level: PsychotypeResult['expression_level'];
   conflict_profile: PsychotypeResult['conflict_profile'];
+  conflict_reason: PsychotypeResult['conflict_reason'];
+  recommendation: PsychotypeResult['recommendation'];
 };
 
 export function serializePsychotypeResult(result: PsychotypeResult) {
   return {
     base_type: result.base_type,
+    psychotype_code: result.psychotype_code,
     secondary_type: result.secondary_type,
     scores: result.scores,
     raw_scores: result.raw_scores,
     top_traits: result.top_traits,
     base_traits: result.base_traits,
     secondary_traits: result.secondary_traits,
+    triad: result.triad,
     triad_status: result.triad_status,
     triad_variant: result.triad_variant,
     expression_level: result.expression_level,
     conflict_profile: result.conflict_profile,
+    conflict_reason: result.conflict_reason,
+    recommendation: result.recommendation,
   };
 }
 
@@ -33,13 +41,17 @@ export function buildStoredPsychotype(result: PsychotypeResult): StoredPsychotyp
   return {
     normalized: result.scores,
     raw: result.raw_scores,
+    psychotype_code: result.psychotype_code,
     top_traits: result.top_traits,
     base_traits: result.base_traits,
     secondary_traits: result.secondary_traits,
+    triad: result.triad,
     triad_status: result.triad_status,
     triad_variant: result.triad_variant,
     expression_level: result.expression_level,
     conflict_profile: result.conflict_profile,
+    conflict_reason: result.conflict_reason,
+    recommendation: result.recommendation,
   };
 }
 
@@ -52,13 +64,17 @@ export function parseStoredPsychotype(scoresJson: string | null): StoredPsychoty
     return {
       normalized: parsed.normalized,
       raw: parsed.raw,
+      psychotype_code: parsed.psychotype_code ?? 'complex',
       top_traits: parsed.top_traits ?? [],
       base_traits: parsed.base_traits ?? ['agr', 'sp'],
-      secondary_traits: parsed.secondary_traits ?? ['agr', 'sp'],
+      secondary_traits: parsed.secondary_traits ?? null,
+      triad: parsed.triad ?? null,
       triad_status: parsed.triad_status ?? 'stable',
       triad_variant: parsed.triad_variant ?? null,
-      expression_level: parsed.expression_level ?? 'medium',
+      expression_level: parsed.expression_level ?? null,
       conflict_profile: Boolean(parsed.conflict_profile),
+      conflict_reason: parsed.conflict_reason ?? null,
+      recommendation: parsed.recommendation ?? null,
     };
   } catch {
     return null;
@@ -80,19 +96,32 @@ export async function savePsychotypeProfile(
     await query(
       `UPDATE profiles SET
         base_type = $1,
-        secondary_type = $2,
-        scores_json = $3,
+        psychotype_code = $2,
+        secondary_type = $3,
+        scores_json = $4,
         onboarding_completed = TRUE,
         updated_at = NOW()
-      WHERE vk_user_id = $4`,
-      [result.base_type, result.secondary_type, scoresJson, vkUserId],
+      WHERE vk_user_id = $5`,
+      [
+        result.base_type,
+        result.psychotype_code,
+        result.secondary_type,
+        scoresJson,
+        vkUserId,
+      ],
     );
   } else {
     await query(
       `INSERT INTO profiles (
-        vk_user_id, base_type, secondary_type, scores_json, onboarding_completed
-      ) VALUES ($1, $2, $3, $4, TRUE)`,
-      [vkUserId, result.base_type, result.secondary_type, scoresJson],
+        vk_user_id, base_type, psychotype_code, secondary_type, scores_json, onboarding_completed
+      ) VALUES ($1, $2, $3, $4, $5, TRUE)`,
+      [
+        vkUserId,
+        result.base_type,
+        result.psychotype_code,
+        result.secondary_type,
+        scoresJson,
+      ],
     );
   }
 
@@ -109,6 +138,7 @@ export function enrichProfileResponse(row: ProfileRow | undefined, vkUserId: num
     trimester: row?.trimester ?? null,
     onboarding_completed: Boolean(row?.onboarding_completed),
     base_type: row?.base_type ?? null,
+    psychotype_code: row?.psychotype_code ?? stored?.psychotype_code ?? null,
     secondary_type: row?.secondary_type ?? null,
     scores_json: row?.scores_json ?? null,
     platform: row?.platform ?? null,
@@ -122,9 +152,12 @@ export function enrichProfileResponse(row: ProfileRow | undefined, vkUserId: num
     top_traits: stored?.top_traits ?? null,
     base_traits: stored?.base_traits ?? null,
     secondary_traits: stored?.secondary_traits ?? null,
+    triad: stored?.triad ?? null,
     triad_status: stored?.triad_status ?? null,
     triad_variant: stored?.triad_variant ?? null,
     expression_level: stored?.expression_level ?? null,
     conflict_profile: stored?.conflict_profile ?? null,
+    conflict_reason: stored?.conflict_reason ?? null,
+    recommendation: stored?.recommendation ?? null,
   };
 }

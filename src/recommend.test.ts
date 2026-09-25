@@ -36,6 +36,7 @@ function profile(partial: Partial<ProfileRow> & Pick<ProfileRow, 'vk_user_id'>):
     trimester: null,
     onboarding_completed: true,
     base_type: null,
+    psychotype_code: null,
     secondary_type: null,
     scores_json: null,
     platform: null,

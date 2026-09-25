@@ -1,5 +1,6 @@
 import type { ProfileRow, TechniqueRow as DbTechniqueRow } from './db.js';
 import { parseStoredPsychotype } from './psychotype/profile.js';
+import type { ExpressionLevel } from './psychotype/types.js';
 
 export type StressZone = 'red' | 'yellow' | 'green';
 
@@ -56,6 +57,11 @@ export function isComplexProfile(profile?: ProfileRow): boolean {
   if (!profile?.scores_json) return false;
   const stored = parseStoredPsychotype(profile.scores_json);
   return Boolean(stored?.conflict_profile || stored?.triad_status === 'complex');
+}
+
+export function expressionLevelFor(profile?: ProfileRow): ExpressionLevel | null {
+  if (!profile?.scores_json) return null;
+  return parseStoredPsychotype(profile.scores_json)?.expression_level ?? null;
 }
 
 function parsePsychotypes(raw: string): string[] {
@@ -220,7 +226,7 @@ function rankPool(
   const complexProfile = options?.complexProfile ?? isComplexProfile(profile);
   const stressReaction = stressReactionForPsychotype(complexProfile ? null : psychotype);
 
-  return pool
+  const ranked = pool
     .map((technique) => ({
       technique,
       score: scoreTechnique(technique, psychotype, trimester, {
@@ -239,6 +245,14 @@ function rankPool(
       return a.technique.duration_sec - b.technique.duration_sec;
     })
     .map(({ technique }) => technique);
+
+  // TC-206: выраженный уровень → только техники своего психотипа, если они есть.
+  if (!complexProfile && psychotype && expressionLevelFor(profile) === 'выраженный') {
+    const personalized = ranked.filter((row) => psychotypesFor(row).includes(psychotype));
+    if (personalized.length > 0) return personalized;
+  }
+
+  return ranked;
 }
 
 export function recommendTechniques(
