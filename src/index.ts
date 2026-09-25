@@ -27,7 +27,10 @@ import {
 } from './psychotype/index.js';
 import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
 import {
+  PARTNER_ARTICLE,
   PARTNER_AVOID_PHRASES,
+  PARTNER_HELP_SIGNALS,
+  PARTNER_PREMIUM_NOTICE,
   PARTNER_PREMIUM_PREVIEW,
   PARTNER_PRINCIPLES,
   PARTNER_SUPPORT_PHRASES,
@@ -950,8 +953,11 @@ app.get('/partner/tips', async (req, res) => {
     principles: PARTNER_PRINCIPLES,
     support_phrases: PARTNER_SUPPORT_PHRASES,
     avoid_phrases: PARTNER_AVOID_PHRASES,
+    article: PARTNER_ARTICLE,
+    help_signals: PARTNER_HELP_SIGNALS,
     has_premium: access.has_premium,
     premium_paid_by: access.paid_by,
+    premium_notice: access.paid_by === 'partner' ? PARTNER_PREMIUM_NOTICE : null,
     tips: access.has_premium ? partnerTipsForType(baseType) : null,
     situational_tips: access.has_premium ? situationalTipsForType(baseType) : [],
     premium_required: !access.has_premium,
