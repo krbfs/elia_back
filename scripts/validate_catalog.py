@@ -327,6 +327,14 @@ def validate_techniques_catalog(file_path: Path, report: ValidationReport) -> Di
             text = content.get('text', '')
             if not isinstance(text, str) or not text.strip():
                 report.add_error(f"{prefix}: content.text пустой или не является строкой")
+            # Навигатор §2.6: артефакты парсера — ведущие ':' или '.'
+            elif text.lstrip().startswith((':', '.')):
+                report.add_error(f"{prefix}: артефакт парсера в content.text: '{text[:20]}...'")
+
+            for field in ('description', 'scientific_basis'):
+                value = tech.get(field)
+                if isinstance(value, str) and value.lstrip().startswith((':', '.')):
+                    report.add_error(f"{prefix}: артефакт парсера в {field}: '{value[:20]}...'")
             
             # audio_url (может быть null)
             audio_url = content.get('audio_url')

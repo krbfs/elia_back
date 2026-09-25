@@ -15,7 +15,7 @@ export const TRAIT_LABELS: Record<TraitKey, string> = {
   ex: 'Экстраверсия',
   lab: 'Лабильность',
   tr: 'Тревожность',
-  sen: 'Сензитивность',
+  sen: 'Чувствительность',
   in: 'Интроверсия',
   rig: 'Ригидность',
 };
