@@ -1,6 +1,6 @@
 {
   "version": "1.1",
-  "updated_at": "2026-08-31",
+  "updated_at": "2026-09-25",
   "total_techniques": 40,
   "premium_techniques": 15,
   "metadata": {
@@ -18,12 +18,26 @@
       "description": "Глубокое дыхание для быстрого снижения напряжения. Вдох на 4 счёта, задержка на 7, выдох на 8.",
       "scientific_basis": "Активация парасимпатической нервной системы через удлинение выдоха (Porges, 1995).",
       "tags": {
-        "level": ["red", "yellow"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["audio", "timer"],
+        "level": [
+          "red",
+          "yellow"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -47,12 +61,24 @@
       "description": "Найди 5 вещей, которые видишь, 4 которые слышишь, 3 которые чувствуешь, 2 которые нюхаешь, 1 которую пробуешь на вкус.",
       "scientific_basis": "Переключение внимания с внутренних переживаний на внешние стимулы снижает активность миндалевидного тела (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["red"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["interactive"],
+        "level": [
+          "red"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -74,12 +100,27 @@
       "description": "Напряги и расслабь основные группы мышц: кулаки, плечи, лицо.",
       "scientific_basis": "Снижение мышечного напряжения через контраст напряжения-расслабления (Jacobson, 1938).",
       "tags": {
-        "level": ["red", "yellow"],
-        "context": ["physical", "sleep"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["audio", "timer"],
+        "level": [
+          "red",
+          "yellow"
+        ],
+        "context": [
+          "physical",
+          "sleep"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -102,12 +143,25 @@
       "description": "Подставь запястья под холодную воду на 30 секунд. Это активирует блуждающий нерв.",
       "scientific_basis": "Стимуляция блуждающего нерва через терморецепторы запускает парасимпатический ответ (Porges, 1995).",
       "tags": {
-        "level": ["red"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["interactive", "timer"],
+        "level": [
+          "red"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "interactive",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -129,12 +183,26 @@
       "description": "Почувствуй стопы на полу. Перенеси вес с пятки на носок и обратно 5 раз.",
       "scientific_basis": "Сенсорная стимуляция стоп активирует соматосенсорную кору, отвлекая от тревожных мыслей (Siegel, 2010).",
       "tags": {
-        "level": ["red"],
-        "context": ["any"],
-        "psychotypes": ["Прагматик", "Индивидуалист"],
-        "stress_reaction": ["Бей"],
-        "trimester": ["any"],
-        "format": ["interactive", "timer"],
+        "level": [
+          "red"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Прагматик",
+          "Индивидуалист"
+        ],
+        "stress_reaction": [
+          "Бей"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "interactive",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -145,7 +213,7 @@
       },
       "metadata": {
         "popularity_score": 4.2,
-        "completion_rate": 0.80,
+        "completion_rate": 0.8,
         "avg_stress_reduction": 1.5
       }
     },
@@ -156,12 +224,28 @@
       "description": "Вдох на 4 счёта, задержка на 4, выдох на 4, задержка на 4. Повтори 4 раза.",
       "scientific_basis": "Ритмичное дыхание стабилизирует вариабельность сердечного ритма (HRV) и снижает кортизол (Gerritsen & Band, 2018).",
       "tags": {
-        "level": ["red", "yellow"],
-        "context": ["any"],
-        "psychotypes": ["Аналитик", "Консерватор"],
-        "stress_reaction": ["Замри"],
-        "trimester": ["any"],
-        "format": ["audio", "timer", "interactive"],
+        "level": [
+          "red",
+          "yellow"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Аналитик",
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "Замри"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -184,12 +268,29 @@
       "description": "10 приседаний или 30 секунд бега на месте. Сбрось напряжение через движение.",
       "scientific_basis": "Физическая активность снижает кортизол и повышает эндорфины (Salmon, 2001).",
       "tags": {
-        "level": ["red", "yellow"],
-        "context": ["any"],
-        "psychotypes": ["Индивидуалист", "Прагматик"],
-        "stress_reaction": ["Бей"],
-        "trimester": ["1", "2", "3-6m"],
-        "format": ["video", "timer"],
+        "level": [
+          "red",
+          "yellow"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Индивидуалист",
+          "Прагматик"
+        ],
+        "stress_reaction": [
+          "Бей"
+        ],
+        "trimester": [
+          "1",
+          "2",
+          "3-6m"
+        ],
+        "format": [
+          "video",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -212,12 +313,29 @@
       "description": "Запиши 3 идеи, как решить проблему, даже самые безумные. Не фильтруй.",
       "scientific_basis": "Вербализация мыслей снижает их эмоциональный заряд и активирует префронтальную кору (Beck, 1979).",
       "tags": {
-        "level": ["yellow"],
-        "context": ["work", "conflict", "practical"],
-        "psychotypes": ["Инноватор"],
-        "stress_reaction": ["Дефлексия"],
-        "trimester": ["2", "3", "3-6m"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow"
+        ],
+        "context": [
+          "work",
+          "conflict",
+          "practical"
+        ],
+        "psychotypes": [
+          "Инноватор"
+        ],
+        "stress_reaction": [
+          "Дефлексия"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -239,12 +357,29 @@
       "description": "Представь место, где тебе спокойно и красиво. Что ты видишь? Что слышишь? Что чувствуешь?",
       "scientific_basis": "Визуализация активирует те же нейронные сети, что и реальный опыт, снижая кортизол (Holmes et al., 2008).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["psychosocial", "medical"],
-        "psychotypes": ["Эстет"],
-        "stress_reaction": ["Мимикрия"],
-        "trimester": ["2", "3", "3-6m"],
-        "format": ["audio", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "psychosocial",
+          "medical"
+        ],
+        "psychotypes": [
+          "Эстет"
+        ],
+        "stress_reaction": [
+          "Мимикрия"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m"
+        ],
+        "format": [
+          "audio",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -267,12 +402,26 @@
       "description": "Пошаговая инструкция: что взять, что надеть, что спросить у врача.",
       "scientific_basis": "Структурирование снижает тревогу через предсказуемость (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["practical", "medical"],
-        "psychotypes": ["Консерватор"],
-        "stress_reaction": ["Сливайся с толпой"],
-        "trimester": ["any"],
-        "format": ["text"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "practical",
+          "medical"
+        ],
+        "psychotypes": [
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "Сливайся с толпой"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -283,7 +432,7 @@
       },
       "metadata": {
         "popularity_score": 4.5,
-        "completion_rate": 0.90,
+        "completion_rate": 0.9,
         "avg_stress_reduction": 1.8
       }
     },
@@ -294,12 +443,29 @@
       "description": "Запиши, что ты чувствуешь прямо сейчас. Без оценки, просто опиши.",
       "scientific_basis": "Экспрессивное письмо снижает стресс и улучшает эмоциональную регуляцию (Pennebaker & Beall, 1986).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["psychosocial", "conflict"],
-        "psychotypes": ["Эмпат"],
-        "stress_reaction": ["Замри"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["text"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "psychosocial",
+          "conflict"
+        ],
+        "psychotypes": [
+          "Эмпат"
+        ],
+        "stress_reaction": [
+          "Замри"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m",
+          "6-12m"
+        ],
+        "format": [
+          "text"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -321,12 +487,27 @@
       "description": "Разбей проблему на шаги: определи, собери факты, выдели 3 варианта, оцени, выбери.",
       "scientific_basis": "Структурированный анализ снижает когнитивную нагрузку и тревогу (Kahneman, 2011).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["work", "practical"],
-        "psychotypes": ["Аналитик"],
-        "stress_reaction": ["Замри"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "work",
+          "practical"
+        ],
+        "psychotypes": [
+          "Аналитик"
+        ],
+        "stress_reaction": [
+          "Замри"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": false
       },
@@ -348,12 +529,25 @@
       "description": "Позвони другу или подруге на 2 минуты. Скажи: «Мне нужна поддержка».",
       "scientific_basis": "Социальная поддержка снижает кортизол и активирует окситоциновую систему (Uvnäs-Moberg, 2003).",
       "tags": {
-        "level": ["yellow"],
-        "context": ["psychosocial", "social"],
-        "psychotypes": ["Лидер Мнений"],
-        "stress_reaction": ["Коммуницируй"],
-        "trimester": ["any"],
-        "format": ["interactive"],
+        "level": [
+          "yellow"
+        ],
+        "context": [
+          "psychosocial",
+          "social"
+        ],
+        "psychotypes": [
+          "Лидер Мнений"
+        ],
+        "stress_reaction": [
+          "Коммуницируй"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -375,12 +569,27 @@
       "description": "Составь чёткий план на завтра с приоритетами. Что можно делегировать?",
       "scientific_basis": "Планирование снижает тревогу через предсказуемость и контроль (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["green"],
-        "context": ["practical", "work"],
-        "psychotypes": ["Прагматик", "Консерватор"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "practical",
+          "work"
+        ],
+        "psychotypes": [
+          "Прагматик",
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -402,12 +611,24 @@
       "description": "Запиши 3 вещи, за которые ты благодарна сегодня. Мелочи тоже считаются.",
       "scientific_basis": "Практика благодарности повышает субъективное благополучие и снижает депрессию (Emmons & McCullough, 2003).",
       "tags": {
-        "level": ["green"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -429,12 +650,28 @@
       "description": "Направь тёплые мысли на себя, близких и всех людей. Пожелай им счастья.",
       "scientific_basis": "Медитация любящей доброты повышает эмпатию и снижает негативные эмоции (Fredrickson et al., 2008).",
       "tags": {
-        "level": ["green"],
-        "context": ["any"],
-        "psychotypes": ["Эмпат", "Лидер Мнений"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["audio"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Лидер Мнений"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m",
+          "6-12m"
+        ],
+        "format": [
+          "audio"
+        ],
         "duration": "long",
         "is_premium": true
       },
@@ -446,7 +683,7 @@
       },
       "metadata": {
         "popularity_score": 4.6,
-        "completion_rate": 0.70,
+        "completion_rate": 0.7,
         "avg_stress_reduction": 1.8
       }
     },
@@ -457,12 +694,27 @@
       "description": "Определи, что для тебя действительно важно в материнстве. Как ты можешь жить в соответствии с этим сегодня?",
       "scientific_basis": "Ясность ценностей повышает психологическую гибкость и снижает стресс (Hayes et al., 2006).",
       "tags": {
-        "level": ["green"],
-        "context": ["psychosocial"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "6-12m"],
-        "format": ["text", "interactive"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "6-12m"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "long",
         "is_premium": true
       },
@@ -484,12 +736,30 @@
       "description": "Оспорь негативную мысль: какие есть доказательства за и против? Какой более сбалансированный взгляд?",
       "scientific_basis": "Когнитивная реструктуризация снижает тревогу и депрессию (Beck, 1979).",
       "tags": {
-        "level": ["green"],
-        "context": ["conflict", "psychosocial"],
-        "psychotypes": ["Аналитик", "Консерватор"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["text", "interactive"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "conflict",
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Аналитик",
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m",
+          "6-12m"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": false
       },
@@ -511,12 +781,29 @@
       "description": "Пройди вниманием от макушки до стоп. Замечай ощущения без оценки.",
       "scientific_basis": "Майндфулнес-сканирование тела снижает стресс и улучшает интероцепцию (Kabat-Zinn, 1990).",
       "tags": {
-        "level": ["green"],
-        "context": ["sleep", "physical"],
-        "psychotypes": ["Эмпат", "Эстет"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["audio"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "sleep",
+          "physical"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Эстет"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m",
+          "6-12m"
+        ],
+        "format": [
+          "audio"
+        ],
         "duration": "long",
         "is_premium": true
       },
@@ -539,12 +826,26 @@
       "description": "Когда ловишь негативную мысль, скажи себе «Стоп» и переключи внимание на дыхание.",
       "scientific_basis": "Когнитивная остановка прерывает автоматические негативные мысли (Beck, 1979).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -566,12 +867,27 @@
       "description": "Пошаговая инструкция: что взять в роддом, что обсудить с врачом, какие документы нужны.",
       "scientific_basis": "Подготовка снижает тревогу через предсказуемость (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["medical", "practical"],
-        "psychotypes": ["Консерватор", "Прагматик"],
-        "stress_reaction": ["any"],
-        "trimester": ["3"],
-        "format": ["text"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "medical",
+          "practical"
+        ],
+        "psychotypes": [
+          "Консерватор",
+          "Прагматик"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "3"
+        ],
+        "format": [
+          "text"
+        ],
         "duration": "medium",
         "is_premium": false
       },
@@ -593,12 +909,26 @@
       "description": "Медленное дыхание с удлинённым выдохом. Вдох на 3 счёта, выдох на 6. Повтори 10 раз.",
       "scientific_basis": "Удлинение выдоха активирует парасимпатическую систему и улучшает засыпание (Jerath et al., 2015).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["sleep"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["audio", "timer"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "sleep"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -621,12 +951,27 @@
       "description": "Представь контейнер, в который можно положить тревожные мысли. Закрой его и отложи до завтра.",
       "scientific_basis": "Контейнирование снижает когнитивную перегрузку и улучшает сон (Linehan, 1993).",
       "tags": {
-        "level": ["yellow"],
-        "context": ["sleep", "psychosocial"],
-        "psychotypes": ["Эмпат", "Аналитик"],
-        "stress_reaction": ["Замри"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow"
+        ],
+        "context": [
+          "sleep",
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Аналитик"
+        ],
+        "stress_reaction": [
+          "Замри"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -637,7 +982,7 @@
       },
       "metadata": {
         "popularity_score": 4.4,
-        "completion_rate": 0.80,
+        "completion_rate": 0.8,
         "avg_stress_reduction": 1.8
       }
     },
@@ -648,12 +993,28 @@
       "description": "Аудио-гид по созданию внутреннего безопасного места. Тёплый голос, мягкая музыка.",
       "scientific_basis": "Аудио-гиды усиливают эффект визуализации через мультисенсорное вовлечение (Holmes et al., 2008).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["psychosocial"],
-        "psychotypes": ["Эмпат", "Эстет"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m"],
-        "format": ["audio"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Эстет"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m"
+        ],
+        "format": [
+          "audio"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -676,12 +1037,27 @@
       "description": "Создай якорь: сожми кулак, когда чувствуешь спокойствие. Используй якорь в стрессе.",
       "scientific_basis": "Якорение через классическое обусловливание создаёт быстрый доступ к ресурсному состоянию (Bandler & Grinder, 1975).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["Прагматик", "Индивидуалист"],
-        "stress_reaction": ["Бей"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Прагматик",
+          "Индивидуалист"
+        ],
+        "stress_reaction": [
+          "Бей"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -703,12 +1079,27 @@
       "description": "Напиши письмо себе из будущего. Что бы ты сказала себе через год?",
       "scientific_basis": "Письмо из будущего повышает самоэффективность и снижает тревогу (King, 2001).",
       "tags": {
-        "level": ["green"],
-        "context": ["psychosocial"],
-        "psychotypes": ["Эмпат", "Лидер Мнений"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "6-12m"],
-        "format": ["text"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Лидер Мнений"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "6-12m"
+        ],
+        "format": [
+          "text"
+        ],
         "duration": "long",
         "is_premium": true
       },
@@ -730,12 +1121,25 @@
       "description": "Просто посиди в тишине 5 минут. Без телефона, без мыслей. Просто будь.",
       "scientific_basis": "Кратковременная тишина снижает кортизол и восстанавливает когнитивный ресурс (Khalfa et al., 2002).",
       "tags": {
-        "level": ["green"],
-        "context": ["any"],
-        "psychotypes": ["Аналитик", "Эмпат"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["timer"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Аналитик",
+          "Эмпат"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "timer"
+        ],
         "duration": "medium",
         "is_premium": false
       },
@@ -757,12 +1161,27 @@
       "description": "Представь круг вокруг себя, наполненный силой и спокойствием. Войди в него.",
       "scientific_basis": "Визуализация ресурсных состояний повышает самоэффективность (Bandler & Grinder, 1975).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["Инноватор", "Лидер Мнений"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Инноватор",
+          "Лидер Мнений"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -784,12 +1203,28 @@
       "description": "Переформулируй проблему: «Как я могу посмотреть на это иначе?»",
       "scientific_basis": "Когнитивное переформулирование снижает эмоциональный заряд ситуации (Ellis, 1962).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["conflict", "psychosocial"],
-        "psychotypes": ["Аналитик", "Консерватор"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "conflict",
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Аналитик",
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": false
       },
@@ -811,12 +1246,29 @@
       "description": "Поблагодари своё тело за то, что оно делает для тебя и ребёнка.",
       "scientific_basis": "Благодарность телу повышает принятие себя и снижает тревогу (Piran, 2016).",
       "tags": {
-        "level": ["green"],
-        "context": ["physical", "psychosocial"],
-        "psychotypes": ["Эмпат", "Эстет"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "0-3m"],
-        "format": ["text", "audio"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "physical",
+          "psychosocial"
+        ],
+        "psychotypes": [
+          "Эмпат",
+          "Эстет"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "0-3m"
+        ],
+        "format": [
+          "text",
+          "audio"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -839,12 +1291,27 @@
       "description": "На вдохе представь, как вдыхаешь спокойствие. На выдохе — как отпускаешь напряжение.",
       "scientific_basis": "Комбинация дыхания и визуализации усиливает парасимпатический ответ (Jerath et al., 2015).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["Эстет", "Эмпат"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["audio", "timer"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Эстет",
+          "Эмпат"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -867,12 +1334,26 @@
       "description": "3 минуты осознанного дыхания. Просто наблюдай за дыханием, не меняя его.",
       "scientific_basis": "Кратковременная медитация снижает стресс и улучшает фокус (Goyal et al., 2014).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["audio", "timer"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -895,12 +1376,26 @@
       "description": "Запиши 5 людей, мест или занятий, которые дают тебе силу. Используй список в стрессе.",
       "scientific_basis": "Активация ресурсов повышает самоэффективность и снижает тревогу (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["green"],
-        "context": ["any"],
-        "psychotypes": ["Прагматик", "Консерватор"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Прагматик",
+          "Консерватор"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": false
       },
@@ -922,12 +1417,28 @@
       "description": "Полная прогрессивная мышечная релаксация: от стоп до макушки. 15 минут.",
       "scientific_basis": "Полная ПМР снижает мышечное напряжение и тревогу (Jacobson, 1938).",
       "tags": {
-        "level": ["green"],
-        "context": ["sleep", "physical"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["audio"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "sleep",
+          "physical"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "2",
+          "3",
+          "3-6m",
+          "6-12m"
+        ],
+        "format": [
+          "audio"
+        ],
         "duration": "long",
         "is_premium": true
       },
@@ -950,12 +1461,26 @@
       "description": "Напиши манифест: какие намерения ты хочешь воплотить на этой неделе?",
       "scientific_basis": "Формулирование намерений повышает мотивацию и снижает тревогу (Gollwitzer, 1999).",
       "tags": {
-        "level": ["green"],
-        "context": ["any"],
-        "psychotypes": ["Инноватор", "Лидер Мнений"],
-        "stress_reaction": ["any"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Инноватор",
+          "Лидер Мнений"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -973,30 +1498,48 @@
     {
       "technique_id": 36,
       "title": "Силовой сброс напряжения",
-      "slug": "power-release",
-      "description": "Комплекс из 5 движений для быстрого сброса напряжения: потянись, сожми кулаки, потряси руками, глубоко вдохни, расслабься.",
-      "scientific_basis": "Короткие физические интервенции снижают уровень кортизола и активируют парасимпатическую систему через соматический путь (Payne et al., 2015).",
+      "slug": "powerful-tension-release",
+      "description": "Сожми кулаки, напряги всё тело, затем резко выдохни со звуком «Ха!», сбрасывая напряжение.",
+      "scientific_basis": "Физическое высвобождение напряжения через контролируемое напряжение-расслабление снижает мышечный тонус и активирует парасимпатическую систему (Jacobson, 1938; Porges, 1995).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["any"],
-        "psychotypes": ["Индивидуалист"],
-        "stress_reaction": ["Бей"],
-        "trimester": ["1", "2", "3-6m"],
-        "format": ["video", "timer"],
+        "level": [
+          "yellow"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Индивидуалист",
+          "Прагматик"
+        ],
+        "stress_reaction": [
+          "Бей"
+        ],
+        "trimester": [
+          "1",
+          "2",
+          "3-6m"
+        ],
+        "format": [
+          "interactive",
+          "timer"
+        ],
         "duration": "short",
         "is_premium": true
       },
       "content": {
-        "text": "Встань. 1. Потянись вверх на 5 секунд. 2. Сожми кулаки и напряги всё тело. 3. Потряси руками и ногами 10 секунд. 4. Глубокий вдох. 5. Полное расслабление.",
+        "text": "Сожми кулаки так сильно, как только можешь. Напряги все мышцы тела: ноги, пресс, плечи. Держи... раз, два, три! И резко выдохни со звуком «Ха!», разжимая кулаки и стряхивая руки. Повтори 2-3 раза.",
         "audio_url": "/media/techniques/36_audio.mp3",
-        "video_url": "/media/techniques/36_video.mp4",
         "audio_duration_seconds": 120,
         "timer_seconds": 120
       },
       "metadata": {
-        "popularity_score": 4.5,
-        "completion_rate": 0.80,
-        "avg_stress_reduction": 1.9
+        "created_at": "2026-09-23T14:30:00Z",
+        "updated_at": "2026-09-23T14:30:00Z",
+        "author": "Научная команда Элии",
+        "popularity_score": 0.0,
+        "completion_rate": 0.0,
+        "avg_stress_reduction": 0.0
       }
     },
     {
@@ -1006,12 +1549,28 @@
       "description": "Разложи стрессор на части: факты, эмоции, действия. Построй схему и увидь ситуацию целиком.",
       "scientific_basis": "Визуальная структуризация снижает когнитивную нагрузку и активирует префронтальную кору (Sweller, 2011).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["conflict", "psychosocial", "work"],
-        "psychotypes": ["Аналитик"],
-        "stress_reaction": ["Замри"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "conflict",
+          "psychosocial",
+          "work"
+        ],
+        "psychotypes": [
+          "Аналитик"
+        ],
+        "stress_reaction": [
+          "Замри"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": true
       },
@@ -1033,12 +1592,28 @@
       "description": "Составь чёткий план на ближайшие 24 часа: 3 приоритета, 3 делегирования, 1 награда себе.",
       "scientific_basis": "Краткосрочное планирование восстанавливает чувство контроля и снижает тревогу (Lazarus & Folkman, 1984).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["practical", "work", "physical"],
-        "psychotypes": ["Прагматик"],
-        "stress_reaction": ["Бей"],
-        "trimester": ["any"],
-        "format": ["text", "interactive"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "practical",
+          "work",
+          "physical"
+        ],
+        "psychotypes": [
+          "Прагматик"
+        ],
+        "stress_reaction": [
+          "Бей"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "short",
         "is_premium": true
       },
@@ -1057,56 +1632,90 @@
       "technique_id": 39,
       "title": "Ритуал стабильности",
       "slug": "stability-ritual",
-      "description": "Создай свой ежедневный ритуал из 5 повторяющихся действий: утро, день, вечер. Это твой якорь предсказуемости.",
-      "scientific_basis": "Ритуалы снижают тревогу через создание предсказуемости и активируют систему вознаграждения (Boyes, 2019).",
+      "description": "Назови 3 вещи, которые видишь, 2 которые можешь потрогать, 1 которая останется неизменной. Создай островок стабильности.",
+      "scientific_basis": "Когнитивная структура и сенсорное заземление снижают тревогу через активацию префронтальной коры и снижение активности миндалевидного тела (Lazarus & Folkman, 1984; Siegel, 2010).",
       "tags": {
-        "level": ["yellow", "green"],
-        "context": ["sleep", "psychosocial", "practical"],
-        "psychotypes": ["Консерватор"],
-        "stress_reaction": ["Сливайся с толпой"],
-        "trimester": ["any"],
-        "format": ["audio", "text"],
+        "level": [
+          "yellow",
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "Консерватор",
+          "Аналитик",
+          "Прагматик"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "text",
+          "interactive"
+        ],
         "duration": "medium",
         "is_premium": true
       },
       "content": {
-        "text": "Составь свой ритуал: 1) Утреннее действие (например, стакан воды + 3 глубоких вдоха). 2) Дневное (прогулка 10 минут). 3) Вечернее (чай + 5 минут тишины). Повторяй каждый день.",
+        "text": "Назови 3 вещи, которые ты видишь прямо перед собой. Теперь назови 2 вещи, которые ты можешь потрогать, и почувствуй их фактуру. И, наконец, назови 1 вещь, которая останется неизменной и стабильной в твоей жизни, несмотря ни на что.",
         "audio_url": "/media/techniques/39_audio.mp3",
         "audio_duration_seconds": 300,
         "timer_seconds": 300
       },
       "metadata": {
-        "popularity_score": 4.7,
-        "completion_rate": 0.82,
-        "avg_stress_reduction": 2.0
+        "created_at": "2026-09-23T14:30:00Z",
+        "updated_at": "2026-09-23T14:30:00Z",
+        "author": "Научная команда Элии",
+        "popularity_score": 0.0,
+        "completion_rate": 0.0,
+        "avg_stress_reduction": 0.0
       }
     },
     {
       "technique_id": 40,
       "title": "Аудио-медитация «Тихая гавань»",
-      "slug": "quiet-haven-meditation",
-      "description": "10-минутная аудио-медитация для глубокого восстановления. Тёплый голос, мягкая музыка, образ безопасного места.",
-      "scientific_basis": "Управляемая медитация снижает кортизол и активирует парасимпатическую систему (Goyal et al., 2014).",
+      "slug": "quiet-harbor-meditation",
+      "description": "Представь, что твой разум — это гавань. Корабли (мысли) находят причал. Ты — это сама гавань, спокойная и глубокая.",
+      "scientific_basis": "Метафорическая визуализация активирует дефолт-систему мозга, способствуя когнитивной разгрузке и эмоциональной регуляции (Kabat-Zinn, 1990; Holmes et al., 2008).",
       "tags": {
-        "level": ["green"],
-        "context": ["sleep", "psychosocial"],
-        "psychotypes": ["any"],
-        "stress_reaction": ["any"],
-        "trimester": ["2", "3", "3-6m", "6-12m"],
-        "format": ["audio"],
+        "level": [
+          "green"
+        ],
+        "context": [
+          "any"
+        ],
+        "psychotypes": [
+          "any"
+        ],
+        "stress_reaction": [
+          "any"
+        ],
+        "trimester": [
+          "any"
+        ],
+        "format": [
+          "audio"
+        ],
         "duration": "long",
         "is_premium": true
       },
       "content": {
-        "text": "Закрой глаза. Представь тихую гавань, где тебя ждут покой и тепло. Слушай голос, который ведёт тебя.",
+        "text": "Представь, что твой разум — это большая, оживлённая гавань. Весь день сюда прибывали корабли: мысли о делах, тревоги, воспоминания. Но сейчас наступает вечер. Представь, как один за другим корабли находят своё место у причала. Они бросают якоря. Двигатели выключаются. В гавани становится всё тише. Ты — это не эти корабли. Ты — это сама гавань. Просторная, глубокая и спокойная.",
         "audio_url": "/media/techniques/40_audio.mp3",
         "audio_duration_seconds": 600,
         "timer_seconds": 600
       },
       "metadata": {
-        "popularity_score": 4.7,
-        "completion_rate": 0.72,
-        "avg_stress_reduction": 2.1
+        "created_at": "2026-09-23T14:30:00Z",
+        "updated_at": "2026-09-23T14:30:00Z",
+        "author": "Научная команда Элии",
+        "popularity_score": 0.0,
+        "completion_rate": 0.0,
+        "avg_stress_reduction": 0.0
       }
     }
   ]
