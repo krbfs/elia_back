@@ -11,6 +11,8 @@ export type RecommendInput = {
   profile?: ProfileRow;
   context?: string | null;
   topN?: number;
+  /** Техники, открытые подарком (§9.4): премиум-замок для них не действует. */
+  unlockedTechniqueIds?: number[];
 };
 
 export type RecommendResult = {
@@ -266,10 +268,11 @@ export function recommendTechniques(
 
   const isPremium = Boolean(input.profile?.is_premium);
   const complexProfile = isComplexProfile(input.profile);
+  const unlocked = new Set(input.unlockedTechniqueIds ?? []);
   const pool = allTechniques.filter(
     (row) =>
       techniqueLevels(row).includes(zone) &&
-      !isPremiumLocked(row, isPremium) &&
+      (!isPremiumLocked(row, isPremium) || unlocked.has(row.id)) &&
       !isRedZoneBlocked(row, zone) &&
       !isYellowComplexTechniqueBlocked(row, input.profile?.crisis_level) &&
       (!complexProfile || isUniversalTechnique(row)),

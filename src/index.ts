@@ -31,6 +31,14 @@ import {
   createPartnerInvite,
   validatePartnerInvite,
 } from './partner/invite.js';
+import {
+  GIFT_ACCESS_DAYS,
+  activateGift,
+  activeGiftsFor,
+  createGift,
+  giftedTechniqueIds,
+  validateGift,
+} from './gift/gift.js';
 import { scoreEpdsAnswers } from './epds/score.js';
 import {
   FREE_DAILY_EMERGENCY_LIMIT,
@@ -417,8 +425,10 @@ async function handleRecommend(req: express.Request, res: express.Response) {
   }
 
   const zone = stressZone(stress);
+  const unlockedTechniqueIds = await giftedTechniqueIds(vkUserId);
   const access = canUseTechnique(profile, zone);
-  if (!access.allowed) {
+  // §9.4: активный подарок открывает доступ даже без подписки.
+  if (!access.allowed && unlockedTechniqueIds.length === 0) {
     res.status(402).json({
       error: access.reason ?? 'premium_required',
       is_premium: Boolean(profile?.is_premium),
@@ -432,6 +442,7 @@ async function handleRecommend(req: express.Request, res: express.Response) {
     stress,
     profile,
     context,
+    unlockedTechniqueIds,
   });
 
   if (!recommendation.technique) {
@@ -551,6 +562,117 @@ app.get('/techniques/:id', async (req, res) => {
   }
 
   res.json({ technique: serializeTechnique(row) });
+});
+
+// «Подари технику» (§9.4): ссылка живёт 7 дней, доступ получателю — тоже 7 дней.
+app.post('/gift', async (req, res) => {
+  const { vk_user_id, technique_id } = req.body ?? {};
+
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+  if (typeof technique_id !== 'number' || !Number.isFinite(technique_id)) {
+    res.status(400).json({ error: 'technique_id must be a number' });
+    return;
+  }
+
+  const gift = await createGift(vk_user_id, technique_id);
+  if (!gift) {
+    res.status(404).json({ error: 'Technique not found' });
+    return;
+  }
+
+  const technique = await queryOne<TechniqueRow>(
+    'SELECT * FROM techniques WHERE id = $1',
+    [technique_id],
+  );
+
+  res.json({
+    gift: {
+      token: gift.token,
+      technique_id: gift.technique_id,
+      token_expires_at: gift.token_expires_at,
+      access_days: GIFT_ACCESS_DAYS,
+    },
+    technique: technique ? serializeTechnique(technique) : null,
+  });
+});
+
+// Превью по ссылке: только техника, без имени отправителя (анонимный шеринг, §9.4).
+app.get('/gift/:token', async (req, res) => {
+  const validation = await validateGift(req.params.token);
+  if (!validation.valid) {
+    const status = validation.reason === 'expired' ? 410 : validation.reason === 'used' ? 409 : 404;
+    res.status(status).json({ error: validation.reason });
+    return;
+  }
+
+  const technique = await queryOne<TechniqueRow>(
+    'SELECT * FROM techniques WHERE id = $1',
+    [validation.gift.technique_id],
+  );
+
+  res.json({
+    technique: technique ? serializeTechnique(technique) : null,
+    access_days: GIFT_ACCESS_DAYS,
+    token_expires_at: validation.gift.token_expires_at,
+  });
+});
+
+app.post('/gift/:token/activate', async (req, res) => {
+  const { vk_user_id } = req.body ?? {};
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const activation = await activateGift(req.params.token, vk_user_id);
+  if (!activation.ok) {
+    const status =
+      activation.reason === 'expired'
+        ? 410
+        : activation.reason === 'used'
+          ? 409
+          : activation.reason === 'own_gift'
+            ? 400
+            : 404;
+    res.status(status).json({ error: activation.reason });
+    return;
+  }
+
+  const technique = await queryOne<TechniqueRow>(
+    'SELECT * FROM techniques WHERE id = $1',
+    [activation.technique_id],
+  );
+
+  res.json({
+    technique: technique ? serializeTechnique(technique) : null,
+    access_expires_at: activation.access_expires_at,
+  });
+});
+
+app.get('/gifts', async (req, res) => {
+  const vkUserId = Number(req.query.vk_user_id);
+  if (!Number.isFinite(vkUserId)) {
+    res.status(400).json({ error: 'vk_user_id required' });
+    return;
+  }
+
+  const gifts = await activeGiftsFor(vkUserId);
+  const techniques = await Promise.all(
+    gifts.map((gift) =>
+      queryOne<TechniqueRow>('SELECT * FROM techniques WHERE id = $1', [gift.technique_id]),
+    ),
+  );
+
+  res.json({
+    gifts: gifts.map((gift, index) => ({
+      technique_id: gift.technique_id,
+      access_expires_at: gift.access_expires_at,
+      technique: techniques[index] ? serializeTechnique(techniques[index]!) : null,
+    })),
+  });
 });
 
 app.get('/favorites', async (req, res) => {

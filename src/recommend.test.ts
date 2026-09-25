@@ -152,6 +152,33 @@ describe('recommend stage 3', () => {
     ).toBeNull();
   });
 
+  it('подарок открывает премиум-технику получателю без подписки (§9.4)', () => {
+    const row = technique({
+      id: 7,
+      title: 'Premium only',
+      level: 'red',
+      is_premium: true,
+    });
+    const freeProfile = profile({ vk_user_id: 1, base_type: 'Эмпат' });
+
+    expect(
+      recommendTechniques([row], {
+        stress: 9,
+        profile: freeProfile,
+        unlockedTechniqueIds: [7],
+      }).technique?.id,
+    ).toBe(7);
+
+    // Подарок открывает только свою технику, остальной премиум остаётся закрытым.
+    expect(
+      recommendTechniques([row], {
+        stress: 9,
+        profile: freeProfile,
+        unlockedTechniqueIds: [8],
+      }).technique,
+    ).toBeNull();
+  });
+
   it('TC-203: free user cannot use yellow zone', () => {
     const freeProfile = profile({ vk_user_id: 1, is_premium: false });
     expect(canUseTechnique(freeProfile, 'yellow')).toEqual({

@@ -163,6 +163,21 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_technique_usage_user_created
       ON technique_usage (vk_user_id, created_at DESC);
 
+    CREATE TABLE IF NOT EXISTS technique_gifts (
+      id SERIAL PRIMARY KEY,
+      token TEXT UNIQUE NOT NULL,
+      technique_id INTEGER NOT NULL REFERENCES techniques(id) ON DELETE CASCADE,
+      sender_vk_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      recipient_vk_id BIGINT,
+      token_expires_at TIMESTAMPTZ NOT NULL,
+      activated_at TIMESTAMPTZ,
+      access_expires_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_technique_gifts_recipient
+      ON technique_gifts (recipient_vk_id, access_expires_at DESC);
+
     ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_code TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
@@ -189,6 +204,18 @@ export type TechniqueRow = {
   evidence: string;
   is_premium: boolean;
   tags_json: string;
+  created_at: Date | string;
+};
+
+export type TechniqueGiftRow = {
+  id: number;
+  token: string;
+  technique_id: number;
+  sender_vk_id: number;
+  recipient_vk_id: number | null;
+  token_expires_at: Date | string;
+  activated_at: Date | string | null;
+  access_expires_at: Date | string | null;
   created_at: Date | string;
 };
 
