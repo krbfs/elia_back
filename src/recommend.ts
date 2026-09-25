@@ -118,6 +118,68 @@ function mapProfileTrimester(trimester: string): string | null {
   return map[trimester] ?? null;
 }
 
+/**
+ * Периоды с ограничением когнитивной нагрузки (Навигатор §3.1, ответы 25.09 п. 3):
+ * 1-й триместр и первые 3 месяца после родов.
+ */
+const LOW_COGNITIVE_LOAD_PERIODS = new Set(['1', '0-3m']);
+
+/** Предпочтительный формат подачи по психотипу (§8.3) — мягкий бонус, не фильтр. */
+const PREFERRED_FORMATS: Record<string, string[]> = {
+  Индивидуалист: ['video', 'interactive'],
+  Инноватор: ['interactive', 'video'],
+  'Лидер Мнений': ['audio'],
+  Эстет: ['interactive'],
+  Консерватор: ['text'],
+  Эмпат: ['audio', 'text'],
+  Аналитик: ['text'],
+  Прагматик: ['text', 'timer'],
+};
+
+function periodKey(trimester: string | null | undefined): string | null {
+  if (!trimester) return null;
+  return mapProfileTrimester(trimester) ?? trimester;
+}
+
+function formatsFor(row: TechniqueRow): string[] {
+  return (parseTags(row).format as string[] | undefined) ?? [];
+}
+
+/** Длинные текстовые практики блокируются в 1-м триместре и 0–3 мес. */
+export function isCognitiveLoadBlocked(
+  row: TechniqueRow,
+  trimester: string | null | undefined,
+): boolean {
+  const period = periodKey(trimester);
+  if (!period || !LOW_COGNITIVE_LOAD_PERIODS.has(period)) return false;
+  return parseTags(row).duration === 'long' && formatsFor(row).includes('text');
+}
+
+export function isSensorimotorTechnique(row: TechniqueRow): boolean {
+  return parseTags(row).is_sensorimotor === true;
+}
+
+/** В 1-м триместре в красной зоне выдаём только сенсомоторные техники. */
+export function isNonSensorimotorBlocked(
+  row: TechniqueRow,
+  zone: StressZone,
+  trimester: string | null | undefined,
+): boolean {
+  if (zone !== 'red') return false;
+  if (periodKey(trimester) !== '1') return false;
+  return !isSensorimotorTechnique(row);
+}
+
+export function matchesPreferredFormat(
+  row: TechniqueRow,
+  psychotype: string | null | undefined,
+): boolean {
+  if (!psychotype) return false;
+  const preferred = PREFERRED_FORMATS[psychotype];
+  if (!preferred) return false;
+  return formatsFor(row).some((format) => preferred.includes(format));
+}
+
 function trimesterMatches(row: TechniqueRow, trimester: string | null): boolean {
   const tagTrimesters = (parseTags(row).trimester as string[] | undefined) ?? ['any'];
   if (tagTrimesters.includes('any')) return true;
@@ -187,6 +249,7 @@ export function scoreTechnique(
 
   if (opts.complexProfile && !isUniversalTechnique(row)) return -1;
   if (!trimesterMatches(row, trimester)) return -1;
+  if (isCognitiveLoadBlocked(row, trimester)) return -1;
   if (!contextMatches(row, opts.context)) return -1;
   if (!stressReactionMatches(row, opts.stressReaction)) return -1;
 
@@ -211,6 +274,11 @@ export function scoreTechnique(
   }
 
   if (row.duration_sec <= 120) {
+    score += 1;
+  }
+
+  // §8.3: предпочтительный формат — мягкий бонус, психотип всегда весомее.
+  if (!opts.complexProfile && matchesPreferredFormat(row, psychotype)) {
     score += 1;
   }
 
@@ -274,6 +342,7 @@ export function recommendTechniques(
       techniqueLevels(row).includes(zone) &&
       (!isPremiumLocked(row, isPremium) || unlocked.has(row.id)) &&
       !isRedZoneBlocked(row, zone) &&
+      !isNonSensorimotorBlocked(row, zone, input.profile?.trimester) &&
       !isYellowComplexTechniqueBlocked(row, input.profile?.crisis_level) &&
       (!complexProfile || isUniversalTechnique(row)),
   );

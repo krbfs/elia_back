@@ -39,7 +39,8 @@
           "timer"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Сядь удобно или ляг. Закрой глаза. Вдохни через нос на 4 счёта. Задержи дыхание на 7 счётов. Медленно выдохни через рот на 8 счётов. Повтори 3-4 раза.",
@@ -80,7 +81,8 @@
           "interactive"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Оглянись вокруг. Назови 5 вещей, которые видишь. 4 звука, которые слышишь. 3 ощущения в теле. 2 запаха. 1 вкус.",
@@ -122,7 +124,8 @@
           "timer"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Напряги кулаки на 5 секунд. Расслабь. Напряги плечи. Расслабь. Напряги лицо. Расслабь.",
@@ -163,7 +166,8 @@
           "timer"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Подойди к раковине. Включи холодную воду. Подставь запястья на 30 секунд. Дыши медленно.",
@@ -204,7 +208,8 @@
           "timer"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Встань. Почувствуй стопы на полу. Перенеси вес на пятки. Затем на носки. Повтори 5 раз.",
@@ -247,7 +252,8 @@
           "interactive"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Вдохни на 4 счёта. Задержи на 4. Выдохни на 4. Задержи на 4. Повтори 4 раза.",
@@ -292,7 +298,8 @@
           "timer"
         ],
         "duration": "short",
-        "is_premium": false
+        "is_premium": false,
+        "is_sensorimotor": true
       },
       "content": {
         "text": "Сделай 10 приседаний или беги на месте 30 секунд. Почувствуй, как напряжение уходит.",

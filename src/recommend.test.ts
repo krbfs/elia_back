@@ -152,6 +152,77 @@ describe('recommend stage 3', () => {
     ).toBeNull();
   });
 
+  it('§3.1: длинная текстовая практика блокируется в 1-м триместре и 0–3 мес', () => {
+    const longText = technique({
+      id: 17,
+      title: 'Работа с ценностями',
+      level: 'green',
+      tags_json: JSON.stringify({ duration: 'long', format: ['text', 'interactive'] }),
+    });
+
+    expect(scoreTechnique(longText, null, 'trimester_1')).toBe(-1);
+    expect(scoreTechnique(longText, null, 'postpartum_0_3')).toBe(-1);
+    expect(scoreTechnique(longText, null, 'trimester_2')).toBeGreaterThan(-1);
+    expect(scoreTechnique(longText, null, 'postpartum_6_12')).toBeGreaterThan(-1);
+  });
+
+  it('§3.1: в 1-м триместре в красной зоне выдаются только сенсомоторные техники', () => {
+    const sensorimotor = technique({
+      id: 2,
+      title: 'Заземление 5-4-3-2-1',
+      level: 'red',
+      tags_json: JSON.stringify({ duration: 'short', format: ['interactive'], is_sensorimotor: true }),
+    });
+    const cognitive = technique({
+      id: 30,
+      title: 'Короткое размышление',
+      level: 'red',
+      tags_json: JSON.stringify({ duration: 'short', format: ['text'] }),
+    });
+
+    const firstTrimester = recommendTechniques([sensorimotor, cognitive], {
+      stress: 9,
+      profile: profile({ vk_user_id: 1, trimester: 'trimester_1' }),
+    });
+    expect(firstTrimester.techniques.map((row) => row.id)).toEqual([2]);
+
+    const secondTrimester = recommendTechniques([sensorimotor, cognitive], {
+      stress: 9,
+      profile: profile({ vk_user_id: 1, trimester: 'trimester_2' }),
+    });
+    expect(secondTrimester.techniques.map((row) => row.id).sort()).toEqual([2, 30]);
+  });
+
+  it('§8.3: предпочтительный формат даёт +1, психотип весомее формата', () => {
+    const preferred = technique({
+      id: 1,
+      title: 'Текстовый чек-лист',
+      level: 'green',
+      psychotypes_json: '["Аналитик"]',
+      tags_json: JSON.stringify({ format: ['text'] }),
+    });
+    const sameTypeOtherFormat = technique({
+      id: 2,
+      title: 'Видео для Аналитика',
+      level: 'green',
+      psychotypes_json: '["Аналитик"]',
+      tags_json: JSON.stringify({ format: ['video'] }),
+    });
+    const universalPreferred = technique({
+      id: 3,
+      title: 'Универсальный текст',
+      level: 'green',
+      psychotypes_json: '["any"]',
+      tags_json: JSON.stringify({ format: ['text'] }),
+    });
+
+    const withBonus = scoreTechnique(preferred, 'Аналитик', null);
+    const withoutBonus = scoreTechnique(sameTypeOtherFormat, 'Аналитик', null);
+    expect(withBonus - withoutBonus).toBe(1);
+    // Совпадение психотипа (+3) перевешивает бонус формата у универсальной техники (+1+1).
+    expect(withoutBonus).toBeGreaterThan(scoreTechnique(universalPreferred, 'Аналитик', null));
+  });
+
   it('подарок открывает премиум-технику получателю без подписки (§9.4)', () => {
     const row = technique({
       id: 7,
