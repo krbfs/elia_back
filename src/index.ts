@@ -26,7 +26,7 @@ import {
   scoreFromAnswers,
 } from './psychotype/index.js';
 import { enrichProfileResponse, savePsychotypeProfile, serializePsychotypeResult } from './psychotype/profile.js';
-import { partnerTipsForType } from './partner/tips.js';
+import { PARTNER_PRINCIPLES, partnerTipsForType } from './partner/tips.js';
 import {
   createPartnerInvite,
   validatePartnerInvite,
@@ -813,7 +813,11 @@ app.get('/partner/tips', async (req, res) => {
   );
 
   const tips = partnerTipsForType(profile?.base_type ?? null);
-  res.json({ base_type: profile?.base_type ?? null, tips });
+  res.json({
+    base_type: profile?.base_type ?? null,
+    tips,
+    principles: PARTNER_PRINCIPLES,
+  });
 });
 
 app.post('/crisis/incidents', async (req, res) => {
