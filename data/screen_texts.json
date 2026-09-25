@@ -1,0 +1,877 @@
+{
+  "version": "1.1",
+  "created_at": "2026-09-23",
+  "description": "Тексты всех экранов приложения «Элия» MVP",
+  "general_principles": {
+    "therapeutic": [
+      "Обращение на «ты»",
+      "Отсутствие «должна», «надо», «правильно»",
+      "Валидирующие фразы («ты имеешь право», «это нормально»)",
+      "Мягкие, тёплые формулировки",
+      "Никаких сравнений с другими"
+    ],
+    "marketing": [
+      "Чёткие обещания ценности",
+      "Мгновенная обратная связь",
+      "Моменты облегчения",
+      "Персонализация («специально для тебя»)"
+    ],
+    "technical": [
+      "Минимум текста на экране (≤5–7 строк)",
+      "Крупные кнопки (≥44pt)",
+      "Возможность паузы/возврата",
+      "Прогресс-бары для длительных процессов",
+      "Метаданные для рекомендательного движка",
+      "Обратная связь после каждой техники"
+    ]
+  },
+  "screens": [
+    {
+      "screen_id": "screen_welcome",
+      "screen_number": 1,
+      "title": "Приветствие (Splash / Welcome)",
+      "duration_sec": 3,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "ЭЛИЯ",
+        "subtitle": "Твой помощник в мире материнства",
+        "body": "Здесь ты можешь выдохнуть.\nМы рядом."
+      },
+      "visual": {
+        "background": "Мягкий градиент (тёплые пастельные тона)",
+        "logo": "Логотип «Элия» (шрифт с закруглёнными элементами)",
+        "animation": "Медленное мерцание, как дыхание"
+      },
+      "buttons": [
+        {
+          "id": "btn_start",
+          "text": "Начать",
+          "action": "go_to_screen_onboarding_1",
+          "style": "primary",
+          "size": "large"
+        },
+        {
+          "id": "btn_login",
+          "text": "У меня уже есть аккаунт",
+          "action": "go_to_login",
+          "style": "secondary_transparent",
+          "size": "medium",
+          "min_touch_target_pt": 44
+        }
+      ],
+      "metadata": {
+        "auto_transition": true,
+        "skip_allowed": false,
+        "analytics_event": "welcome_shown"
+      },
+      "therapeutic_note": "Фраза «Здесь ты можешь выдохнуть» — это первое разрешение, которое получает мама. Она задаёт тон всему взаимодействию: безопасность, принятие, отсутствие требований.",
+      "marketing_note": "«Твой помощник в мире материнства» — чёткое позиционирование. Не «терапия», не «лечение», а «помощник» — снижает порог входа и стигму."
+    },
+    {
+      "screen_id": "screen_onboarding_1",
+      "screen_number": 2,
+      "title": "Онбординг — Шаг 1 (Знакомство)",
+      "duration_sec": 20,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Давай познакомимся",
+        "body": "Элия — это не очередное приложение, которое требует от тебя «стать лучше».\n\nЭто пространство, где ты можешь быть любой: уставшей, злой, растерянной, счастливой.\n\nЗдесь не нужно быть идеальной мамой. Достаточно быть собой."
+      },
+      "visual": {
+        "illustration": "Женщина с ребёнком на руках, мягкие линии, тёплые цвета",
+        "animation": "Лёгкое покачивание, как будто мама укачивает ребёнка"
+      },
+      "buttons": [
+        {
+          "id": "btn_continue",
+          "text": "Продолжить",
+          "action": "go_to_screen_onboarding_2",
+          "style": "primary"
+        },
+        {
+          "id": "btn_skip",
+          "text": "Пропустить",
+          "action": "go_to_screen_stress_indicator",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "screen_number": 1,
+        "total_screens": 3,
+        "analytics_event": "onboarding_1_viewed"
+      },
+      "therapeutic_note": "Ключевая фраза — «не нужно быть идеальной мамой». Это снимает основной источник тревоги у перинатальной аудитории.",
+      "marketing_note": "«Не очередное приложение, которое требует стать лучше» — дифференциация от конкурентов."
+    },
+    {
+      "screen_id": "screen_onboarding_2",
+      "screen_number": 3,
+      "title": "Онбординг — Шаг 2 (Как это работает)",
+      "duration_sec": 20,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Как это работает",
+        "body": "Ты отвечаешь на несколько простых вопросов. Это займёт 5–7 минут.\n\nЭлия определяет твой тип и подбирает техники, которые подходят именно тебе.\n\nТы получаешь короткие практики (от 1 до 15 минут), которые можно делать где угодно.\n\nВсё просто. Всё — для тебя."
+      },
+      "visual": {
+        "icons": [
+          "вопросы",
+          "профиль",
+          "практика"
+        ],
+        "animation": "Последовательное появление шагов"
+      },
+      "buttons": [
+        {
+          "id": "btn_understand",
+          "text": "Понятно",
+          "action": "go_to_screen_onboarding_3",
+          "style": "primary"
+        },
+        {
+          "id": "btn_skip",
+          "text": "Пропустить",
+          "action": "go_to_screen_stress_indicator",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "screen_number": 2,
+        "total_screens": 3,
+        "analytics_event": "onboarding_2_viewed"
+      },
+      "marketing_note": "Чёткое обещание: «5–7 минут» — снимает страх долгого теста. «От 1 до 15 минут» — показывает гибкость под реальность мамы."
+    },
+    {
+      "screen_id": "screen_onboarding_3",
+      "screen_number": 4,
+      "title": "Онбординг — Шаг 3 (Безопасность и доверие)",
+      "duration_sec": 20,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Прежде чем начнём — важное",
+        "body": "Элия — это инструмент самопомощи и поддержки. Она не заменяет консультацию психолога или врача.\n\nЕсли ты чувствуешь, что не справляешься, — пожалуйста, обратись к специалисту. Это не слабость. Это забота о себе.\n\n🔒 Твои данные защищены. Мы не передаём их третьим лицам и не используем для рекламы."
+      },
+      "visual": {
+        "icon": "Иконка щита (защита)",
+        "colors": "Мягкие, спокойные цвета"
+      },
+      "buttons": [
+        {
+          "id": "btn_agree",
+          "text": "Согласна и продолжить",
+          "action": "go_to_screen_stress_indicator",
+          "style": "primary",
+          "checkbox_default": true
+        },
+        {
+          "id": "btn_privacy",
+          "text": "Подробнее о конфиденциальности",
+          "action": "open_privacy_policy",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "screen_number": 3,
+        "total_screens": 3,
+        "checkbox_default_checked": true,
+        "analytics_event": "onboarding_3_viewed"
+      },
+      "therapeutic_note": "Фраза «Это не слабость. Это забота о себе» — критически важна для снижения стигмы обращения к специалисту."
+    },
+    {
+      "screen_id": "screen_stress_indicator",
+      "screen_number": 5,
+      "title": "Стресс-индикатор (Вход в приложение)",
+      "duration_sec": 30,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Как ты себя чувствуешь прямо сейчас?",
+        "body": "Подвигай слайдер, чтобы показать свой уровень стресса",
+        "slider_labels": [
+          "😊 Спокойно",
+          "😐 Напряженно",
+          "😰 На пределе"
+        ],
+        "context_questions": {
+          "location": {
+            "question": "Где ты сейчас?",
+            "options": [
+              "🏢 Работа",
+              "🏠 Дом",
+              "🚶 Среди людей",
+              "🌙 Ночь (рядом ребёнок)"
+            ]
+          },
+          "feeling": {
+            "question": "Что ты чувствуешь?",
+            "options": [
+              "🤜 Хочу действовать",
+              "🏃 Нужно двигаться",
+              "❄️ Оцепенение",
+              "🗣️ Ищу поддержки"
+            ]
+          }
+        }
+      },
+      "buttons": [
+        {
+          "id": "btn_show_technique",
+          "text": "Показать технику",
+          "action": "get_recommendation",
+          "style": "primary"
+        },
+        {
+          "id": "btn_help_now",
+          "text": "Мне нужна помощь сейчас",
+          "action": "go_to_screen_emergency",
+          "style": "danger"
+        },
+        {
+          "id": "btn_diagnose",
+          "text": "Я хочу пройти диагностику",
+          "action": "go_to_screen_questionnaire_intro",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "slider_range": [
+          1,
+          10
+        ],
+        "context_questions": [
+          "location",
+          "feeling"
+        ],
+        "next_screen_conditional": {
+          "stress_8_10": "screen_emergency",
+          "stress_1_7_and_no_profile": "screen_questionnaire_intro",
+          "stress_1_7_and_profile_exists": "screen_recommendation"
+        },
+        "analytics_event": "stress_indicator_used"
+      },
+      "therapeutic_note": "Формулировка «Как ты себя чувствуешь» вместо «Оцените уровень стресса» — более человечная, снижает когнитивную нагрузку. Шкала без эмодзи гнева (😡) — стресс у мам редко проявляется как злость."
+    },
+    {
+      "screen_id": "screen_questionnaire_intro",
+      "screen_number": 6,
+      "title": "Интро диагностики",
+      "duration_sec": 20,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Давай узнаем тебя получше",
+        "body": "Ответь на 10 коротких ситуаций и 2 уточняющих вопроса. Здесь нет правильных или неправильных ответов — только твои.\n\nЭто поможет Элии подобрать техники, которые подойдут именно тебе.\n\n⏱️ Это займёт около 5–7 минут. Ты можешь сделать паузу в любой момент."
+      },
+      "buttons": [
+        {
+          "id": "btn_start",
+          "text": "Начать",
+          "action": "go_to_screen_question_1",
+          "style": "primary"
+        },
+        {
+          "id": "btn_later",
+          "text": "Вернуться позже",
+          "action": "go_to_screen_home",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "total_questions": 10,
+        "total_sliders": 2,
+        "estimated_time_min": 5,
+        "analytics_event": "questionnaire_started"
+      },
+      "therapeutic_note": "«Здесь нет правильных или неправильных ответов» — снимает страх оценки, который особенно силён у тревожных типов."
+    },
+    {
+      "screen_id": "screen_question_template",
+      "screen_number": "7-16",
+      "title": "Вопросы опросника (10 ситуаций)",
+      "duration_sec": 25,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline_template": "Вопрос {n} из 10",
+        "progress_text_template": "Вопрос {n} из 10",
+        "question_text": "{question_text}",
+        "options": [
+          "{option_a}",
+          "{option_b}",
+          "{option_c}"
+        ]
+      },
+      "visual": {
+        "progress_bar": true,
+        "progress_style": "positive_framing"
+      },
+      "buttons": [
+        {
+          "id": "btn_next",
+          "text": "Далее",
+          "action": "go_to_next_question",
+          "style": "primary"
+        },
+        {
+          "id": "btn_back",
+          "text": "Назад",
+          "action": "go_to_previous_question",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "question_number": "{n}",
+        "total_questions": 10,
+        "progress_bar": true,
+        "analytics_event": "question_answered"
+      },
+      "therapeutic_note": "Прогресс-бар с позитивным фреймингом «Вопрос 3 из 10» даёт ощущение контроля и предсказуемости — важно для тревожных типов, при этом не усиливает напряжение обратным отсчётом."
+    },
+    {
+      "screen_id": "screen_slider_template",
+      "screen_number": "17",
+      "title": "Слайдеры (2 уточняющих вопроса)",
+      "duration_sec": 20,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline_template": "Уточняющий вопрос {n} из 2",
+        "body_template": "Оцените, насколько вам подходит описание: {trait_description}",
+        "slider_labels": [
+          "Совсем не про меня",
+          "Полностью про меня"
+        ]
+      },
+      "buttons": [
+        {
+          "id": "btn_next",
+          "text": "Далее",
+          "action": "go_to_next_slider_or_result",
+          "style": "primary"
+        }
+      ],
+      "metadata": {
+        "slider_number": "{n}",
+        "total_sliders": 2,
+        "slider_range": [
+          1,
+          10
+        ],
+        "analytics_event": "slider_answered"
+      }
+    },
+    {
+      "screen_id": "screen_result",
+      "screen_number": 18,
+      "title": "Результат диагностики",
+      "duration_sec": 60,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Твой профиль",
+        "psychotype_name": "{psychotype_name}",
+        "psychotype_description_template": "{psychotype_description}",
+        "sections": {
+          "strengths": {
+            "title": "Твои сильные стороны",
+            "items_template": [
+              "{strength_1}",
+              "{strength_2}",
+              "{strength_3}"
+            ]
+          },
+          "challenges": {
+            "title": "Что может быть сложным",
+            "items_template": [
+              "{challenge_1}",
+              "{challenge_2}",
+              "{challenge_3}"
+            ]
+          }
+        }
+      },
+      "buttons": [
+        {
+          "id": "btn_understand",
+          "text": "Понятно",
+          "action": "go_to_screen_first_recommendation",
+          "style": "primary"
+        },
+        {
+          "id": "btn_details",
+          "text": "Рассказать подробнее",
+          "action": "open_full_description",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_invite_partner",
+          "text": "Пригласить партнёра",
+          "action": "go_to_screen_partner_invite",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "profile_type": "{psychotype_id}",
+        "show_full_description": true,
+        "analytics_event": "diagnosis_completed"
+      },
+      "marketing_note": "Блок «Твои сильные стороны» — это момент облегчения и валидации. Пользователь должен почувствовать: «Меня поняли, и это не плохо»."
+    },
+    {
+      "screen_id": "screen_first_recommendation",
+      "screen_number": 19,
+      "title": "Первая рекомендация",
+      "duration_sec": 30,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Твоя первая техника",
+        "body": "Мы подобрали её специально для тебя.",
+        "technique_name": "{technique_name}",
+        "technique_duration": "⏱️ {duration}",
+        "technique_description": "{description}",
+        "cta": "Попробуй прямо сейчас. Это займёт всего {x} минут."
+      },
+      "buttons": [
+        {
+          "id": "btn_try",
+          "text": "Попробовать",
+          "action": "go_to_screen_technique_player",
+          "style": "primary"
+        },
+        {
+          "id": "btn_later",
+          "text": "Позже",
+          "action": "go_to_screen_home",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "technique_id": "auto_selected",
+        "analytics_event": "first_recommendation_shown"
+      },
+      "marketing_note": "«Мы подобрали её специально для тебя» — создаёт ощущение персонализации и заботы."
+    },
+    {
+      "screen_id": "screen_technique_player",
+      "screen_number": 20,
+      "title": "Плеер техники",
+      "duration_sec": "dynamic",
+      "premium": "dynamic",
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "{technique_name}",
+        "body": "{audio_or_text_content}",
+        "visual": "{breathing_animation_or_progress_bar}"
+      },
+      "buttons": [
+        {
+          "id": "btn_pause",
+          "text": "Пауза",
+          "action": "pause_technique",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_resume",
+          "text": "Продолжить",
+          "action": "resume_technique",
+          "style": "primary"
+        },
+        {
+          "id": "btn_finish",
+          "text": "Завершить",
+          "action": "go_to_screen_home",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_share",
+          "text": "Поделиться подруге",
+          "action": "share_technique",
+          "style": "secondary",
+          "free_for_all": true
+        }
+      ],
+      "post_completion": {
+        "question": "Как ты себя чувствуешь сейчас?",
+        "options": [
+          "😊 Лучше",
+          "😐 Без изменений",
+          "😡 Хуже"
+        ]
+      },
+      "metadata": {
+        "technique_id": "dynamic",
+        "audio_file": "path_to_audio",
+        "pause_allowed": true,
+        "feedback_after": true,
+        "share_allowed_for_all": true,
+        "analytics_event": "technique_completed"
+      },
+      "therapeutic_note": "Обратная связь после техники — критически важна для обучения рекомендательного движка и для валидации пользователя. Кнопка «Поделиться» бесплатна для всех пользователей — это обеспечивает виральный рост."
+    },
+    {
+      "screen_id": "screen_home",
+      "screen_number": 21,
+      "title": "Главный экран (Home)",
+      "duration_sec": "persistent",
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Привет, {user_name}",
+        "body": "Как ты сегодня?",
+        "stress_slider": "😊 → 😰",
+        "daily_techniques": {
+          "title": "Твои техники на сегодня:",
+          "items": [
+            "{technique_1} ({duration_1})",
+            "{technique_2} ({duration_2})"
+          ]
+        },
+        "quick_access": {
+          "title": "Быстрый доступ:",
+          "items": [
+            "🆘 Экстренная помощь",
+            "📊 Дневник настроения",
+            "👤 Мой профиль"
+          ]
+        }
+      },
+      "buttons": [
+        {
+          "id": "btn_emergency",
+          "text": "Экстренная помощь",
+          "action": "go_to_screen_emergency",
+          "style": "danger"
+        },
+        {
+          "id": "btn_diary",
+          "text": "Дневник",
+          "action": "go_to_screen_mood_diary",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_profile",
+          "text": "Профиль",
+          "action": "go_to_screen_profile",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "dynamic_content": true,
+        "techniques_daily": 2,
+        "analytics_event": "home_viewed"
+      },
+      "therapeutic_note": "Приветствие по имени (если указано) и вопрос «Как ты сегодня?» — создаёт ощущение, что приложение «видит» пользователя."
+    },
+    {
+      "screen_id": "screen_emergency",
+      "screen_number": 22,
+      "title": "Экстренная помощь",
+      "duration_sec": 30,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Я рядом",
+        "body": "Давай сделаем что-то простое прямо сейчас. Это займёт 1–2 минуты.",
+        "technique_auto_select": true
+      },
+      "buttons": [
+        {
+          "id": "btn_try",
+          "text": "Попробовать",
+          "action": "launch_technique",
+          "style": "primary"
+        },
+        {
+          "id": "btn_alternative",
+          "text": "Мне нужна другая",
+          "action": "get_alternative_technique",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_specialist",
+          "text": "Позвонить специалисту",
+          "action": "go_to_contacts",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "technique_auto_select": true,
+        "crisis_protocol_trigger": "stress_8_10",
+        "analytics_event": "emergency_used"
+      },
+      "therapeutic_note": "«Я рядом» — короткая, тёплая фраза, которая создаёт ощущение присутствия. Не «Вы в опасности», не «Срочно», а «Я рядом»."
+    },
+    {
+      "screen_id": "screen_crisis",
+      "screen_number": 23,
+      "title": "Кризисный экран (Красный уровень)",
+      "duration_sec": "persistent",
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "ВАЖНО: ПОЖАЛУЙСТА, ПРОЧИТАЙ ЭТО ВНИМАТЕЛЬНО",
+        "body": "То, что ты сейчас чувствуешь, — это сигнал, что тебе нужна немедленная помощь. Элия — это инструмент самопомощи, и она не может заменить специалиста в этой ситуации.\n\nПожалуйста, сделай одно из этих действий прямо сейчас:\n\n📞 Позвони по номеру экстренной службы: 112\n📞 Позвони на горячую линию психологической помощи: 8-800-2000-122\n🏥 Обратись в ближайшее отделение скорой психиатрической помощи\n💬 Свяжись с твоим врачом или акушером-гинекологом\n\nТы не одна. Помощь доступна. Пожалуйста, позвони прямо сейчас.",
+        "final_message": "Ты не одна. Помощь доступна. Пожалуйста, позвони прямо сейчас."
+      },
+      "buttons": [
+        {
+          "id": "btn_call_112",
+          "text": "Позвонить 112",
+          "action": "tel:112",
+          "style": "danger_primary"
+        },
+        {
+          "id": "btn_call_hotline",
+          "text": "Позвонить на горячую линию",
+          "action": "tel:88002000122",
+          "style": "danger_secondary"
+        },
+        {
+          "id": "btn_save_contacts",
+          "text": "Сохранить контакты",
+          "action": "save_to_phone",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "crisis_level": "red",
+        "ai_disabled": true,
+        "auto_call_buttons": true,
+        "analytics_event": "crisis_protocol_triggered"
+      },
+      "therapeutic_note": "Критически важно: ИИ полностью отключается. Только детерминированные инструкции. Приоритет — ложноположительные срабатывания над ложноотрицательными. Фраза «Пожалуйста, позвони прямо сейчас» — мягкая, поддерживающая, без императивного приказа."
+    },
+    {
+      "screen_id": "screen_mood_diary",
+      "screen_number": 24,
+      "title": "Дневник настроения",
+      "duration_sec": 30,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Дневник настроения",
+        "body": "Отмечай, как ты себя чувствуешь. Это поможет Элии лучше понимать тебя.",
+        "today_question": "Сегодня:",
+        "mood_options": [
+          "😊 Отлично",
+          "🙂 Хорошо",
+          "😐 Нормально",
+          "😔 Грустно",
+          "😡 Плохо"
+        ]
+      },
+      "visual": {
+        "calendar": true,
+        "marks": true
+      },
+      "buttons": [
+        {
+          "id": "btn_save",
+          "text": "Сохранить",
+          "action": "save_mood_entry",
+          "style": "primary"
+        },
+        {
+          "id": "btn_note",
+          "text": "Добавить заметку",
+          "action": "open_text_field",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "tracking_type": "daily",
+        "analytics_event": "mood_logged"
+      }
+    },
+    {
+      "screen_id": "screen_partner_invite",
+      "screen_number": 25,
+      "title": "Приглашение партнёра",
+      "duration_sec": 45,
+      "premium": true,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Пригласи партнёра",
+        "body": "Ты можешь предложить партнёру пройти короткий тест. Элия подскажет ему, как лучше тебя поддерживать.\n\nЭто не «проверка» и не «экзамен». Это способ стать ближе.\n\nВ Premium-версии Элия даст партнёру персональные подсказки, как поддерживать именно твой тип, без нарушения твоих личных границ.",
+        "partner_gets": {
+          "title": "Что получит партнёр:",
+          "items": [
+            "Понимание твоего типа",
+            "Конкретные советы, как помогать",
+            "Короткие подсказки в сложных ситуациях"
+          ]
+        }
+      },
+      "buttons": [
+        {
+          "id": "btn_send",
+          "text": "Отправить приглашение",
+          "action": "open_messenger",
+          "style": "primary"
+        },
+        {
+          "id": "btn_copy",
+          "text": "Скопировать ссылку",
+          "action": "copy_link",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_later",
+          "text": "Позже",
+          "action": "go_back",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "premium_only": true,
+        "share_methods": [
+          "messenger",
+          "link"
+        ],
+        "analytics_event": "partner_invited"
+      },
+      "marketing_note": "«Это не проверка и не экзамен» — снимает страх, что партнёр воспримет это как давление. Добавлена строка о ценности Premium-версии для партнёра."
+    },
+    {
+      "screen_id": "screen_premium",
+      "screen_number": 26,
+      "title": "Подписка / Premium",
+      "duration_sec": 60,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Элия Premium",
+        "body": "Больше техник. Больше поддержки. Больше заботы о себе.",
+        "includes": {
+          "title": "Что входит:",
+          "items": [
+            "✅ Все техники (от 1 до 15 минут)",
+            "✅ Персональные программы",
+            "✅ Приглашение партнёра",
+            "✅ Группы поддержки по типу",
+            "✅ Аналитика настроения"
+          ]
+        },
+        "pricing": "299 ₽ / месяц или 2 490 ₽ / год (выгода 30%)"
+      },
+      "buttons": [
+        {
+          "id": "btn_trial",
+          "text": "Попробовать 7 дней бесплатно",
+          "action": "start_trial",
+          "style": "primary"
+        },
+        {
+          "id": "btn_subscribe",
+          "text": "Оформить подписку",
+          "action": "open_vk_pay",
+          "style": "secondary"
+        },
+        {
+          "id": "btn_not_now",
+          "text": "Не сейчас",
+          "action": "go_back",
+          "style": "secondary"
+        }
+      ],
+      "metadata": {
+        "trial_days": 7,
+        "prices": {
+          "monthly": 299,
+          "yearly": 2490,
+          "currency": "RUB"
+        },
+        "show_only_if_stress_level_below": 8,
+        "analytics_event": "premium_viewed"
+      },
+      "ethical_note": "Добавлен параметр «show_only_if_stress_level_below»: 8. Показывать платную подписку человеку в красной зоне стресса (8-10 баллов) категорически запрещено Навигатором v4.1 (§9.2 и §16). Это хищнический паттерн, который воспринимается как манипуляция на панике."
+    },
+    {
+      "screen_id": "screen_profile",
+      "screen_number": 27,
+      "title": "Профиль / Настройки",
+      "duration_sec": 30,
+      "premium": false,
+      "psychotypes": [
+        "any"
+      ],
+      "texts": {
+        "headline": "Мой профиль",
+        "info": {
+          "type": "Тип: {psychotype_name}",
+          "period": "Срок беременности / возраст ребёнка: {value}",
+          "last_assessment": "Дата последней диагностики: {date}"
+        },
+        "settings": {
+          "title": "Настройки:",
+          "items": [
+            "🔔 Уведомления",
+            "🔒 Конфиденциальность",
+            "🌍 Язык",
+            "👤 Выйти"
+          ]
+        }
+      },
+      "buttons": [
+        {
+          "id": "btn_reassess",
+          "text": "Обновить диагностику",
+          "action": "go_to_screen_questionnaire_intro",
+          "style": "primary"
+        },
+        {
+          "id": "btn_delete",
+          "text": "Удалить профиль",
+          "action": "confirm_and_delete",
+          "style": "danger"
+        }
+      ],
+      "metadata": {
+        "show_type": true,
+        "show_assessment_date": true,
+        "analytics_event": "profile_viewed"
+      }
+    }
+  ]
+}
