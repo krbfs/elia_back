@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import {
@@ -63,6 +64,10 @@ app.use(
   }),
 );
 app.use(express.json());
+
+// Аудио техник: /media/techniques/{id}_audio.mp3 из audio_scripts.json.
+const mediaDir = process.env.MEDIA_DIR ?? fileURLToPath(new URL('../media', import.meta.url));
+app.use('/media', express.static(mediaDir, { maxAge: '7d' }));
 
 async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: number) {
   const greenNudge =

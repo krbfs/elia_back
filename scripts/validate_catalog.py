@@ -10,6 +10,7 @@
     python scripts/validate_catalog.py                      # Проверить все файлы
     python scripts/validate_catalog.py --techniques         # Только каталог техник
     python scripts/validate_catalog.py --questionnaire      # Только опросник
+    python scripts/validate_catalog.py --audio              # Только аудио-транскрипты
     python scripts/validate_catalog.py --verbose            # Подробный отчёт
 
 Автор: Команда Элии
@@ -172,7 +173,8 @@ def validate_techniques_catalog(file_path: Path, report: ValidationReport) -> Di
         'by_duration': defaultdict(int),
         'premium_by_psychotype': defaultdict(list),
         'ids': set(),
-        'slugs': set()
+        'slugs': set(),
+        'audio': {}
     }
     
     # Валидация каждой техники
@@ -330,6 +332,12 @@ def validate_techniques_catalog(file_path: Path, report: ValidationReport) -> Di
             audio_url = content.get('audio_url')
             if audio_url is not None and not isinstance(audio_url, str):
                 report.add_error(f"{prefix}: content.audio_url должен быть строкой или null")
+            elif isinstance(audio_url, str):
+                stats['audio'][tech_id] = {
+                    'url': audio_url,
+                    'duration': content.get('audio_duration_seconds'),
+                    'title': title,
+                }
             
             # video_url (может отсутствовать)
             video_url = content.get('video_url')
@@ -375,6 +383,114 @@ def validate_techniques_catalog(file_path: Path, report: ValidationReport) -> Di
     report.add_info(f"По длительности: {dict(stats['by_duration'])}")
     report.add_info(f"Покрытие психотипов премиумом: {dict(stats['premium_by_psychotype'])}")
     
+    return stats
+
+
+# ============================================================================
+# ВАЛИДАЦИЯ АУДИО-ТРАНСКРИПТОВ
+# ============================================================================
+
+def validate_audio_scripts(
+    file_path: Path,
+    media_dir: Path,
+    tech_stats: Dict[str, Any],
+    report: ValidationReport,
+) -> Dict[str, Any]:
+    """
+    Валидирует data/audio_scripts.json и связность с каталогом техник:
+    каждая техника с audio_url имеет транскрипт, и наоборот.
+    """
+    print(f"\n Валидация аудио-транскриптов: {file_path}")
+
+    if not file_path.exists():
+        report.add_error(f"Файл не найден: {file_path}")
+        return {}
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        report.add_error(f"Ошибка парсинга JSON: {e}")
+        return {}
+
+    scripts = data.get('audio_files')
+    if not isinstance(scripts, list):
+        report.add_error("Отсутствует список 'audio_files'")
+        return {}
+
+    if not data.get('voice_direction'):
+        report.add_warning("Не задан voice_direction (требования к озвучке)")
+
+    stats = {'total': len(scripts), 'by_id': {}, 'missing_files': []}
+
+    for script in scripts:
+        script_id = script.get('id')
+        prefix = f"Транскрипт #{script_id}"
+
+        if not isinstance(script_id, int):
+            report.add_error(f"Транскрипт без корректного id: {script.get('title')}")
+            continue
+        if script_id in stats['by_id']:
+            report.add_error(f"{prefix}: дублирующийся id")
+            continue
+
+        for field in ('filename', 'title', 'duration_seconds', 'transcript'):
+            if not script.get(field):
+                report.add_error(f"{prefix}: отсутствует поле '{field}'")
+
+        duration = script.get('duration_seconds')
+        if not isinstance(duration, int) or duration <= 0:
+            report.add_error(f"{prefix}: duration_seconds должен быть положительным int")
+
+        stats['by_id'][script_id] = script
+
+        filename = script.get('filename')
+        if isinstance(filename, str) and not (media_dir / 'techniques' / filename).exists():
+            stats['missing_files'].append(filename)
+
+    catalog_audio = tech_stats.get('audio', {}) if tech_stats else {}
+
+    # Техника ссылается на аудио, но транскрипта нет.
+    for tech_id, info in sorted(catalog_audio.items()):
+        script = stats['by_id'].get(tech_id)
+        if script is None:
+            report.add_error(
+                f"Техника #{tech_id} «{info['title']}» ссылается на {info['url']}, "
+                f"но транскрипта в audio_scripts.json нет"
+            )
+            continue
+
+        expected_name = info['url'].rsplit('/', 1)[-1]
+        if script.get('filename') != expected_name:
+            report.add_error(
+                f"Техника #{tech_id}: audio_url ждёт файл '{expected_name}', "
+                f"в транскрипте '{script.get('filename')}'"
+            )
+
+        if info['duration'] is not None and info['duration'] != script.get('duration_seconds'):
+            report.add_warning(
+                f"Техника #{tech_id}: длительность в каталоге {info['duration']} сек, "
+                f"в транскрипте {script.get('duration_seconds')} сек"
+            )
+
+    # Транскрипт есть, а техника на него не ссылается.
+    for script_id in sorted(stats['by_id']):
+        if catalog_audio and script_id not in catalog_audio:
+            report.add_error(
+                f"Транскрипт #{script_id} «{stats['by_id'][script_id].get('title')}» "
+                f"не привязан ни к одной технике (нет audio_url)"
+            )
+
+    if stats['missing_files']:
+        report.add_warning(
+            f"Озвучка не записана, нет {len(stats['missing_files'])} файлов в "
+            f"{media_dir / 'techniques'}: {', '.join(stats['missing_files'][:5])}"
+            + (' …' if len(stats['missing_files']) > 5 else '')
+        )
+
+    report.add_info(f"Всего транскриптов: {stats['total']}")
+    report.add_info(f"Техник с audio_url: {len(catalog_audio)}")
+
     return stats
 
 
@@ -584,6 +700,7 @@ def main():
   python scripts/validate_catalog.py                  # Проверить все файлы
   python scripts/validate_catalog.py --techniques     # Только каталог техник
   python scripts/validate_catalog.py --questionnaire  # Только опросник
+  python scripts/validate_catalog.py --audio          # Только аудио-транскрипты
   python scripts/validate_catalog.py --verbose        # Подробный отчёт
         """
     )
@@ -597,6 +714,11 @@ def main():
         '--questionnaire',
         action='store_true',
         help='Валидировать только опросник'
+    )
+    parser.add_argument(
+        '--audio',
+        action='store_true',
+        help='Валидировать только аудио-транскрипты'
     )
     parser.add_argument(
         '--verbose', '-v',
@@ -613,10 +735,14 @@ def main():
     
     techniques_file = data_dir / 'techniques_catalog.json'
     questionnaire_file = data_dir / 'questionnaire_full.json'
+    audio_file = data_dir / 'audio_scripts.json'
+    media_dir = project_root / 'media'
     
     # Если не указаны конкретные файлы — проверяем все
-    validate_techniques = args.techniques or not (args.techniques or args.questionnaire)
-    validate_questionnaire_flag = args.questionnaire or not (args.techniques or args.questionnaire)
+    explicit = args.techniques or args.questionnaire or args.audio
+    validate_techniques = args.techniques or args.audio or not explicit
+    validate_questionnaire_flag = args.questionnaire or not explicit
+    validate_audio_flag = args.audio or not explicit
     
     print("=" * 70)
     print("🌸 ВАЛИДАЦИЯ КАТАЛОГОВ ПРОЕКТА «ЭЛИЯ»")
@@ -627,8 +753,13 @@ def main():
     report = ValidationReport()
     
     # Валидация каталога техник
+    tech_stats = {}
     if validate_techniques:
-        validate_techniques_catalog(techniques_file, report)
+        tech_stats = validate_techniques_catalog(techniques_file, report)
+    
+    # Валидация аудио-транскриптов
+    if validate_audio_flag:
+        validate_audio_scripts(audio_file, media_dir, tech_stats, report)
     
     # Валидация опросника
     if validate_questionnaire_flag:
