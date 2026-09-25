@@ -1,12 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  areAdjacentTraits,
+  areAntagonisticTraits,
   calculatePsychotype,
+  calculateSubjectivePsychotype,
+  hasAntagonisticPair,
   normalizeScores,
+  psychotypeCodeFor,
   resolveBaseTraits,
   traitTypeName,
+  CONFLICT_BASE_TYPE,
+  CONFLICT_RECOMMENDATION,
+  LAB_IN_MULTIPLIER,
+  TRIAD_THRESHOLD,
+  type PsychotypeCode,
   type TraitKey,
   type TraitScores,
 } from './core.js';
@@ -155,5 +165,123 @@ describe('psychotype stage 2', () => {
     pairs.forEach(([first, second, name]) => {
       expect(traitTypeName(first, second)).toBe(name);
     });
+  });
+});
+
+describe('psychotype v4.3', () => {
+  const zero: TraitScores = { agr: 0, sp: 0, ex: 0, lab: 0, tr: 0, sen: 0, in: 0, rig: 0 };
+  // Фикстура TC-101: Консерватор + Эмпат, третья тенденция — Интроверсия.
+  const conservator: TraitScores = { agr: 2, sp: 1, ex: 1, lab: 2, tr: 14, sen: 13, in: 5, rig: 6 };
+  const ring: TraitKey[] = ['agr', 'sp', 'ex', 'lab', 'tr', 'sen', 'in', 'rig'];
+
+  it('множитель 1.33 применяется только к lab и in', () => {
+    const normalized = normalizeScores({ ...zero, lab: 3, in: 3, tr: 8 });
+
+    expect(normalized.lab).toBeCloseTo(((3 * LAB_IN_MULTIPLIER) / 9) * 10, 5);
+    expect(normalized.in).toBeCloseTo(((3 * LAB_IN_MULTIPLIER) / 10) * 10, 5);
+    expect(normalized.tr).toBe(5);
+  });
+
+  it('антагонистических пар ровно четыре: 1-5, 2-6, 3-7, 4-8', () => {
+    const found: string[] = [];
+    ring.forEach((first, index) => {
+      ring.slice(index + 1).forEach((second) => {
+        if (areAntagonisticTraits(first, second)) found.push(`${first}-${second}`);
+      });
+    });
+
+    expect(found).toEqual(['agr-tr', 'sp-sen', 'ex-in', 'lab-rig']);
+    expect(hasAntagonisticPair(['tr', 'sen', 'in'])).toBe(false);
+    expect(hasAntagonisticPair(['tr', 'sen', 'agr'])).toBe(true);
+  });
+
+  it('смежность замкнута в круг: rig соседствует с agr', () => {
+    expect(areAdjacentTraits('rig', 'agr')).toBe(true);
+    expect(areAdjacentTraits('agr', 'sp')).toBe(true);
+    expect(areAdjacentTraits('agr', 'ex')).toBe(false);
+  });
+
+  it('psychotypeCodeFor покрывает 8 типов, остальное — complex', () => {
+    const codes: [string, PsychotypeCode][] = [
+      ['Индивидуалист', 'individualist'],
+      ['Инноватор', 'innovator'],
+      ['Лидер Мнений', 'leader'],
+      ['Эстет', 'esthete'],
+      ['Консерватор', 'conservator'],
+      ['Эмпат', 'empath'],
+      ['Аналитик', 'analyst'],
+      ['Прагматик', 'pragmatist'],
+    ];
+
+    codes.forEach(([name, code]) => {
+      expect(psychotypeCodeFor(name)).toBe(code);
+    });
+    expect(psychotypeCodeFor('complex')).toBe('complex');
+    expect(psychotypeCodeFor(CONFLICT_BASE_TYPE)).toBe('complex');
+  });
+
+  it('триада формируется только выше порога третьей тенденции', () => {
+    expect(normalizeScores(conservator).in).toBeGreaterThanOrEqual(TRIAD_THRESHOLD);
+    const above = calculatePsychotype(conservator);
+    expect(above.triad).toEqual(['tr', 'sen', 'in']);
+    expect(above.triad_variant).toBe('in-sen-tr');
+
+    const weakThird = { ...conservator, in: 4 };
+    expect(normalizeScores(weakThird).in).toBeLessThan(TRIAD_THRESHOLD);
+    const below = calculatePsychotype(weakThird);
+    expect(below.triad).toBeNull();
+    expect(below.triad_variant).toBeNull();
+    expect(below.triad_status).toBe('stable');
+  });
+
+  it('уровень выраженности считается по топ-2 и разрыву с топ-3', () => {
+    expect(calculatePsychotype(conservator).expression_level).toBe('выраженный');
+    expect(calculatePsychotype({ ...zero, tr: 10, sen: 10 }).expression_level).toBe('умеренный');
+    expect(calculatePsychotype({ ...zero, tr: 6, sen: 6, in: 2 }).expression_level).toBe(
+      'смазанный',
+    );
+  });
+
+  it('антагонистическая пара в топ-2 даёт конфликт без сопутствующего типа', () => {
+    // Слайдеры переданы намеренно: для конфликтного профиля они не должны создавать сопутствующий тип.
+    const result = calculatePsychotype({ ...zero, agr: 18, tr: 16 }, { agr: 9, tr: 4 });
+
+    expect(result.base_traits).toEqual(['agr', 'tr']);
+    expect(result.base_type).toBe(CONFLICT_BASE_TYPE);
+    expect(result.psychotype_code).toBe('complex');
+    expect(result.triad_status).toBe('conflict');
+    expect(result.conflict_profile).toBe(true);
+    expect(result.conflict_reason).toBe(
+      'Обнаружена антагонистическая пара в топ-2: Агрессивность (1) + Тревожность (5)',
+    );
+    expect(result.recommendation).toBe(CONFLICT_RECOMMENDATION);
+    expect(result.secondary_type).toBeNull();
+    expect(result.secondary_traits).toBeNull();
+    expect(result.expression_level).toBeNull();
+  });
+
+  it('сопутствующий тип: основной опросник требует слайдеров, опросник партнёра берёт 3-4 тенденции', () => {
+    expect(calculatePsychotype(conservator).secondary_type).toBeNull();
+    expect(calculatePsychotype(conservator, { tr: 6, sen: 8 }).secondary_type).toBe('Эмпат');
+
+    const partner = calculateSubjectivePsychotype(conservator);
+    expect(partner.base_type).toBe('Консерватор');
+    expect(partner.secondary_type).toBe('Аналитик');
+    expect(partner.secondary_traits).toEqual(['in', 'rig']);
+  });
+
+  it('равные нормализованные баллы разрешаются сырыми баллами, затем порядком круга', () => {
+    const byRaw: TraitScores = { ...zero, agr: 18, tr: 16 };
+    const normalized = normalizeScores(byRaw);
+    expect(normalized.agr).toBe(normalized.tr);
+    expect(calculatePsychotype(byRaw).base_traits).toEqual(['agr', 'tr']);
+
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+    const byRing = calculatePsychotype({ ...zero, tr: 16, rig: 16 });
+    expect(byRing.base_traits).toEqual(['tr', 'rig']);
+    expect(info).toHaveBeenCalledWith(
+      expect.stringContaining('неоднозначность между Тревожность и Ригидность'),
+    );
+    info.mockRestore();
   });
 });
