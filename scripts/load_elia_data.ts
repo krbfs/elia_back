@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { initDb } from '../src/db.js';
 import { loadEliaData } from '../src/seed/loadCatalog.js';
 
+// --force больше не очищает таблицы: он лишь разрешает удалить техники, которых нет в каталоге.
 const force = process.argv.includes('--force');
 
 async function main() {
@@ -21,7 +22,7 @@ async function main() {
     secondRun.questionsUpdated;
 
   if (duplicates === 0) {
-    console.log('  repeat run: no duplicates (ok)');
+    console.log('  repeat run: no changes (ok)');
   } else {
     console.log('  repeat run: changes detected (check upsert logic)');
   }

@@ -136,9 +136,10 @@ def seed_techniques(force: bool = False) -> int:
                 return 0
 
             if force and count > 0:
-                cur.execute("TRUNCATE TABLE favorites")
-                cur.execute("TRUNCATE TABLE techniques RESTART IDENTITY CASCADE")
-                print("  ✓ Таблица techniques очищена")
+                # Очистка удалила бы избранное, историю прохождений и подарки (ON DELETE CASCADE).
+                print("⚠️  Перезаливка через этот скрипт отключена.")
+                print("   Используйте npm run load-data — он обновляет техники по catalog_id без удаления.")
+                return 0
 
             psycopg2.extras.execute_batch(
                 cur,

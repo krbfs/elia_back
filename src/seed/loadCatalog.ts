@@ -58,20 +58,40 @@ function mapTechnique(raw: Record<string, unknown>) {
   };
 }
 
+const TECHNIQUE_COLUMNS = [
+  'slug',
+  'title',
+  'text',
+  'duration_sec',
+  'audio_url',
+  'level',
+  'context',
+  'psychotypes_json',
+  'reaction',
+  'evidence',
+  'is_premium',
+  'tags_json',
+] as const;
+
+/**
+ * Синхронизация без удаления данных: upsert по стабильному catalog_id, и строка трогается
+ * только если содержимое действительно изменилось. Избранное, история прохождений и
+ * подарки ссылаются на techniques(id) с ON DELETE CASCADE, поэтому TRUNCATE здесь запрещён.
+ */
+const UPSERT_TECHNIQUE = `
+  INSERT INTO techniques (catalog_id, ${TECHNIQUE_COLUMNS.join(', ')})
+  VALUES (${Array.from({ length: TECHNIQUE_COLUMNS.length + 1 }, (_, i) => `$${i + 1}`).join(', ')})
+  ON CONFLICT (catalog_id) DO UPDATE SET
+    ${TECHNIQUE_COLUMNS.map((column) => `${column} = EXCLUDED.${column}`).join(',\n    ')}
+  WHERE (${TECHNIQUE_COLUMNS.map((column) => `techniques.${column}`).join(', ')})
+    IS DISTINCT FROM (${TECHNIQUE_COLUMNS.map((column) => `EXCLUDED.${column}`).join(', ')})
+  RETURNING (xmax = 0) AS inserted`;
+
 export async function loadTechniquesFromCatalog(
   options: { force?: boolean } = {},
 ): Promise<Pick<LoadStats, 'techniquesCreated' | 'techniquesUpdated'>> {
   const data = loadJson(TECHNIQUES_FILE);
   const items = (data.techniques as Record<string, unknown>[] | undefined) ?? [];
-
-  const count = await queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM techniques');
-  const existingCount = Number(count?.count ?? 0);
-  if (existingCount > 0 && existingCount !== items.length && !options.force) {
-    return loadTechniquesFromCatalog({ force: true });
-  }
-  if (existingCount === items.length && !options.force) {
-    return { techniquesCreated: 0, techniquesUpdated: 0 };
-  }
 
   let techniquesCreated = 0;
   let techniquesUpdated = 0;
@@ -79,65 +99,49 @@ export async function loadTechniquesFromCatalog(
 
   try {
     await client.query('BEGIN');
-    if (options.force && existingCount > 0) {
-      await client.query('TRUNCATE TABLE favorites');
-      await client.query('TRUNCATE TABLE techniques RESTART IDENTITY CASCADE');
-    }
 
     for (const raw of items) {
       const item = mapTechnique(raw);
-      const existing = await client.query(
-        'SELECT id FROM techniques WHERE catalog_id = $1',
-        [item.catalog_id],
-      );
+      const result = await client.query<{ inserted: boolean }>(UPSERT_TECHNIQUE, [
+        item.catalog_id,
+        item.slug,
+        item.title,
+        item.text,
+        item.duration_sec,
+        item.audio_url,
+        item.level,
+        item.context,
+        item.psychotypes_json,
+        item.reaction,
+        item.evidence,
+        item.is_premium,
+        item.tags_json,
+      ]);
 
-      if (existing.rowCount) {
+      if (result.rows[0]?.inserted) techniquesCreated += 1;
+      else if (result.rowCount) techniquesUpdated += 1;
+    }
+
+    // Техники, которых больше нет в каталоге. Удаляем только по явной просьбе (--force):
+    // вместе со строкой каскадом уходят избранное, история прохождений и подарки.
+    const catalogIds = items.map((raw) => Number(raw.technique_id));
+    const orphans = await client.query<{ catalog_id: number; title: string }>(
+      'SELECT catalog_id, title FROM techniques WHERE catalog_id IS NULL OR NOT (catalog_id = ANY($1::int[]))',
+      [catalogIds],
+    );
+
+    if (orphans.rowCount) {
+      const titles = orphans.rows.map((row) => `#${row.catalog_id} ${row.title}`).join(', ');
+      if (options.force) {
         await client.query(
-          `UPDATE techniques SET
-            slug = $2, title = $3, text = $4, duration_sec = $5, audio_url = $6,
-            level = $7, context = $8, psychotypes_json = $9, reaction = $10,
-            evidence = $11, is_premium = $12, tags_json = $13
-          WHERE catalog_id = $1`,
-          [
-            item.catalog_id,
-            item.slug,
-            item.title,
-            item.text,
-            item.duration_sec,
-            item.audio_url,
-            item.level,
-            item.context,
-            item.psychotypes_json,
-            item.reaction,
-            item.evidence,
-            item.is_premium,
-            item.tags_json,
-          ],
+          'DELETE FROM techniques WHERE catalog_id IS NULL OR NOT (catalog_id = ANY($1::int[]))',
+          [catalogIds],
         );
-        techniquesUpdated += 1;
+        console.warn(`Catalog sync: удалены техники вне каталога (${titles})`);
       } else {
-        await client.query(
-          `INSERT INTO techniques (
-            catalog_id, slug, title, text, duration_sec, audio_url, level, context,
-            psychotypes_json, reaction, evidence, is_premium, tags_json
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-          [
-            item.catalog_id,
-            item.slug,
-            item.title,
-            item.text,
-            item.duration_sec,
-            item.audio_url,
-            item.level,
-            item.context,
-            item.psychotypes_json,
-            item.reaction,
-            item.evidence,
-            item.is_premium,
-            item.tags_json,
-          ],
+        console.warn(
+          `Catalog sync: в БД есть техники вне каталога (${titles}). Запустите load-data --force, чтобы удалить их вместе с избранным и историей.`,
         );
-        techniquesCreated += 1;
       }
     }
 
@@ -158,54 +162,33 @@ export async function loadQuestionsFromCatalog(
   const data = loadJson(QUESTIONNAIRE_FILE);
   const items = (data.questions as Record<string, unknown>[] | undefined) ?? [];
 
-  const count = await queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM questions');
-  const existingCount = Number(count?.count ?? 0);
-  if (existingCount > 0 && existingCount !== items.length && !options.force) {
-    return loadQuestionsFromCatalog({ force: true });
-  }
-  if (existingCount === items.length && !options.force) {
-    return { questionsCreated: 0, questionsUpdated: 0 };
-  }
-
   let questionsCreated = 0;
   let questionsUpdated = 0;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
-    if (options.force && existingCount > 0) {
-      await client.query('TRUNCATE TABLE questions RESTART IDENTITY');
-    }
 
     for (const raw of items) {
-      const questionNumber = Number(raw.number);
-      const existing = await client.query(
-        'SELECT question_number FROM questions WHERE question_number = $1',
-        [questionNumber],
+      const result = await client.query<{ inserted: boolean }>(
+        `INSERT INTO questions (question_number, context, text, options_json)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (question_number) DO UPDATE SET
+           context = EXCLUDED.context, text = EXCLUDED.text,
+           options_json = EXCLUDED.options_json, updated_at = NOW()
+         WHERE (questions.context, questions.text, questions.options_json)
+           IS DISTINCT FROM (EXCLUDED.context, EXCLUDED.text, EXCLUDED.options_json)
+         RETURNING (xmax = 0) AS inserted`,
+        [
+          Number(raw.number),
+          String(raw.context ?? 'any'),
+          String(raw.text),
+          JSON.stringify(raw.options ?? []),
+        ],
       );
 
-      const payload = [
-        questionNumber,
-        String(raw.context ?? 'any'),
-        String(raw.text),
-        JSON.stringify(raw.options ?? []),
-      ];
-
-      if (existing.rowCount) {
-        await client.query(
-          `UPDATE questions SET context = $2, text = $3, options_json = $4, updated_at = NOW()
-           WHERE question_number = $1`,
-          payload,
-        );
-        questionsUpdated += 1;
-      } else {
-        await client.query(
-          `INSERT INTO questions (question_number, context, text, options_json)
-           VALUES ($1, $2, $3, $4)`,
-          payload,
-        );
-        questionsCreated += 1;
-      }
+      if (result.rows[0]?.inserted) questionsCreated += 1;
+      else if (result.rowCount) questionsUpdated += 1;
     }
 
     await client.query('COMMIT');
@@ -226,26 +209,30 @@ export async function loadEliaData(options: { force?: boolean } = {}): Promise<L
 }
 
 export async function ensureCatalogSeeded() {
-  const [techniquesCount, questionsCount] = await Promise.all([
-    queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM techniques'),
-    queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM questions'),
-  ]);
+  // Сверять число строк недостаточно: правки текстов и тегов количество не меняют.
+  const stats = await loadEliaData();
 
-  const techniques = Number(techniquesCount?.count ?? 0);
-  const questions = Number(questionsCount?.count ?? 0);
-
-  if (techniques !== EXPECTED_TECHNIQUE_COUNT) {
-    const stats = await loadTechniquesFromCatalog({ force: techniques > 0 });
+  if (stats.techniquesCreated || stats.techniquesUpdated) {
     console.log(
       `Catalog techniques: created=${stats.techniquesCreated}, updated=${stats.techniquesUpdated}`,
     );
   }
-
-  if (questions !== EXPECTED_QUESTION_COUNT) {
-    const stats = await loadQuestionsFromCatalog({ force: questions > 0 });
+  if (stats.questionsCreated || stats.questionsUpdated) {
     console.log(
       `Catalog questions: created=${stats.questionsCreated}, updated=${stats.questionsUpdated}`,
     );
+  }
+
+  const [techniques, questions] = await Promise.all([
+    queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM techniques'),
+    queryOne<{ count: string }>('SELECT COUNT(*)::text AS count FROM questions'),
+  ]);
+
+  if (Number(techniques?.count ?? 0) !== EXPECTED_TECHNIQUE_COUNT) {
+    console.warn(`Catalog sync: техник в БД ${techniques?.count}, ожидается ${EXPECTED_TECHNIQUE_COUNT}`);
+  }
+  if (Number(questions?.count ?? 0) !== EXPECTED_QUESTION_COUNT) {
+    console.warn(`Catalog sync: вопросов в БД ${questions?.count}, ожидается ${EXPECTED_QUESTION_COUNT}`);
   }
 }
 
