@@ -6,6 +6,10 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is required (Neon Postgres connection string)');
 }
 
+// BIGINT (oid 20) по умолчанию приходит строкой, а vk_user_id во всех типах — number.
+// Из-за этого сравнения вида gift.sender_vk_id === recipientVkId молча давали false.
+pg.types.setTypeParser(20, (value) => Number(value));
+
 export const pool = new pg.Pool({
   connectionString,
   ssl: connectionString.includes('neon.tech') || process.env.DATABASE_SSL === 'true'
