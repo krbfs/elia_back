@@ -60,6 +60,14 @@ import {
 import { logCrisisIncident } from './crisis/incidents.js';
 import { recordStressLevel } from './crisis/recordStress.js';
 import { hasSustainedHighStress } from './crisis/stressLog.js';
+import {
+  MOOD_OPTIONS,
+  deleteMoodEntries,
+  getMoodEntries,
+  hasSustainedLowMood,
+  isValidMoodScore,
+  saveMoodEntry,
+} from './mood/mood.js';
 import { logTechniqueUsage, parseStressLevel } from './technique/usage.js';
 
 const app = express();
@@ -89,8 +97,12 @@ const mediaDir = process.env.MEDIA_DIR ?? fileURLToPath(new URL('../media', impo
 app.use('/media', express.static(mediaDir, { maxAge: '7d' }));
 
 async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: number) {
-  const greenNudge =
-    row?.crisis_level === 'green' ? await hasSustainedHighStress(vkUserId) : false;
+  // §10.2: зелёный уровень ловит и устойчивый стресс, и снижение настроения 3 дня подряд.
+  const [sustainedStress, sustainedLowMood] =
+    row?.crisis_level === 'green'
+      ? await Promise.all([hasSustainedHighStress(vkUserId), hasSustainedLowMood(vkUserId)])
+      : [false, false];
+  const greenNudge = sustainedStress || sustainedLowMood;
 
   return {
     ...enrichProfileResponse(row, vkUserId),
@@ -98,7 +110,11 @@ async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: numbe
     daily_techniques_remaining: getDailyUsage(row).remaining,
     daily_techniques_limit: FREE_DAILY_EMERGENCY_LIMIT,
     green_nudge: greenNudge,
-    green_nudge_reason: greenNudge ? ('sustained_stress_3d' as const) : null,
+    green_nudge_reason: sustainedStress
+      ? ('sustained_stress_3d' as const)
+      : sustainedLowMood
+        ? ('sustained_low_mood_3d' as const)
+        : null,
   };
 }
 
@@ -993,6 +1009,49 @@ app.post('/crisis/incidents', async (req, res) => {
   res.json({ ok: true });
 });
 
+app.get('/mood', async (req, res) => {
+  const vkUserId = Number(req.query.vk_user_id);
+  if (!Number.isFinite(vkUserId)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const entries = await getMoodEntries(vkUserId);
+  res.json({ options: MOOD_OPTIONS, entries });
+});
+
+app.post('/mood', async (req, res) => {
+  const { vk_user_id, mood_score, note } = req.body ?? {};
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+  if (!isValidMoodScore(mood_score)) {
+    res.status(400).json({ error: 'mood_score must be 1–5' });
+    return;
+  }
+  if (note !== undefined && note !== null && typeof note !== 'string') {
+    res.status(400).json({ error: 'note must be a string' });
+    return;
+  }
+
+  await query('INSERT INTO users (vk_user_id) VALUES ($1) ON CONFLICT (vk_user_id) DO NOTHING', [
+    vk_user_id,
+  ]);
+
+  const entry = await saveMoodEntry(vk_user_id, mood_score, note ?? null);
+  if (!entry) {
+    res.status(400).json({ error: 'mood_score must be 1–5' });
+    return;
+  }
+
+  const profile = await queryOne<ProfileRow>('SELECT * FROM profiles WHERE vk_user_id = $1', [
+    vk_user_id,
+  ]);
+
+  res.json({ entry, profile: await buildProfileResponse(profile ?? undefined, vk_user_id) });
+});
+
 app.post('/stress/report', async (req, res) => {
   const { vk_user_id, stress } = req.body ?? {};
 
@@ -1105,6 +1164,7 @@ app.delete('/profile', async (req, res) => {
   await query('DELETE FROM favorites WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM technique_usage WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM stress_log WHERE vk_user_id = $1', [vk_user_id]);
+  await deleteMoodEntries(vk_user_id);
   await query('DELETE FROM crisis_incidents WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM partner_profiles WHERE user_vk_id = $1', [vk_user_id]);
   await query('DELETE FROM profiles WHERE vk_user_id = $1', [vk_user_id]);

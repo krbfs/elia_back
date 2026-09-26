@@ -122,6 +122,17 @@ export async function initDb() {
       UNIQUE (vk_user_id, logged_date)
     );
 
+    CREATE TABLE IF NOT EXISTS mood_entries (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
+      mood_score INTEGER NOT NULL CHECK (mood_score BETWEEN 1 AND 5),
+      note TEXT,
+      logged_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (vk_user_id, logged_date)
+    );
+
     CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
       token_hash TEXT PRIMARY KEY,
       vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
