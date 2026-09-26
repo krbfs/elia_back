@@ -100,6 +100,7 @@ export async function savePsychotypeProfile(
         secondary_type = $3,
         scores_json = $4,
         onboarding_completed = TRUE,
+        psychotype_updated_at = NOW(),
         updated_at = NOW()
       WHERE vk_user_id = $5`,
       [
@@ -113,8 +114,9 @@ export async function savePsychotypeProfile(
   } else {
     await query(
       `INSERT INTO profiles (
-        vk_user_id, base_type, psychotype_code, secondary_type, scores_json, onboarding_completed
-      ) VALUES ($1, $2, $3, $4, $5, TRUE)`,
+        vk_user_id, base_type, psychotype_code, secondary_type, scores_json,
+        onboarding_completed, psychotype_updated_at
+      ) VALUES ($1, $2, $3, $4, $5, TRUE, NOW())`,
       [
         vkUserId,
         result.base_type,
@@ -149,6 +151,7 @@ export function enrichProfileResponse(row: ProfileRow | undefined, vkUserId: num
     epds_completed_at: row?.epds_completed_at ?? null,
     is_premium: Boolean(row?.is_premium),
     updated_at: row?.updated_at ?? null,
+    psychotype_updated_at: row?.psychotype_updated_at ?? null,
     top_traits: stored?.top_traits ?? null,
     base_traits: stored?.base_traits ?? null,
     secondary_traits: stored?.secondary_traits ?? null,

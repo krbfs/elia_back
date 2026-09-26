@@ -190,6 +190,7 @@ export async function initDb() {
       ON technique_gifts (recipient_vk_id, access_expires_at DESC);
 
     ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_code TEXT;
+    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_updated_at TIMESTAMPTZ;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
@@ -250,6 +251,7 @@ export type ProfileRow = {
   onboarding_completed: boolean;
   base_type: string | null;
   psychotype_code: string | null;
+  psychotype_updated_at?: Date | string | null;
   secondary_type: string | null;
   scores_json: string | null;
   platform: string | null;
