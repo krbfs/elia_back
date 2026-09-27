@@ -67,10 +67,25 @@ async function main() {
     redItems.length > 0 && redItems.every((t: any) => SENSORIMOTOR.has(t.catalog_id)),
     redItems.map((t: any) => `#${t.catalog_id}`).join(' '));
 
+  // Ответы 27.09, п. 8: зелёная зона бесплатна без ограничений.
   const calm = await api('GET', `/techniques/recommend?vk_user_id=${USER}&stress=3`);
-  check('вне красной зоны бесплатный доступ закрыт (§9.1)',
-    calm.status === 402 && calm.data.error === 'premium_required',
-    `${calm.status} ${calm.data.error ?? ''}`);
+  check('зелёная зона бесплатна', calm.status === 200 && (calm.data.techniques?.length ?? 0) > 0,
+    `${calm.status}, ${calm.data.techniques?.length ?? 0} техник`);
+  check('аудио-техники не попадают в бесплатную выдачу',
+    (calm.data.techniques ?? []).every((t: any) => !t.audio_url));
+
+  const midZone = await api('GET', `/techniques/recommend?vk_user_id=${USER}&stress=6`);
+  check('жёлтая зона бесплатна, пока есть недельный лимит',
+    midZone.status === 200, `${midZone.status} ${midZone.data.error ?? ''}`);
+
+  const feelings = await Promise.all(
+    ['active_action', 'freeze', 'social_safety', 'verbal_switch'].map((feeling) =>
+      api('GET', `/techniques/recommend?vk_user_id=${USER}&stress=6&feeling=${feeling}`),
+    ),
+  );
+  check('каждый вариант «что тебе нужно» даёт непустую выдачу',
+    feelings.every((item) => (item.data.techniques?.length ?? 0) > 0),
+    feelings.map((item) => item.data.techniques?.length ?? 0).join('/'));
 
   const freeTips = await api('GET', `/partner/tips?vk_user_id=${USER}`);
   check('без премиума таблица подсказок закрыта превью',
@@ -153,6 +168,25 @@ async function main() {
   check('с премиумом приходит таблица подсказок по типу',
     tips.data.premium_required === false && !!tips.data.tips,
     tips.data.tips ? 'таблица есть' : 'таблицы нет');
+
+  console.log(`\n=== Аналитика ===`);
+  check('согласованное событие принимается',
+    (await api('POST', '/analytics/event', {
+      vk_user_id: USER,
+      event: 'welcome_shown',
+      screen: 'screen_welcome',
+      payload: { note: 'этот текст не должен сохраниться', stress_level: 4 },
+    })).status === 204);
+  check('незнакомое событие отклоняется',
+    (await api('POST', '/analytics/event', { vk_user_id: USER, event: 'mood_logged' })).status ===
+      400);
+
+  console.log(`\n=== Тексты экранов ===`);
+  const screen = await api('GET', '/screen-texts/screen_first_recommendation');
+  check('копирайт отдаётся с бэкенда', screen.data.screen?.texts?.headline === 'Твоя первая техника',
+    String(screen.data.screen?.texts?.headline));
+  check('неизвестный экран — 404',
+    (await api('GET', '/screen-texts/нет-такого')).status === 404);
 
   console.log(`\n=== Право на забвение ===`);
   const removed = await api('DELETE', '/profile', { vk_user_id: USER });
