@@ -137,6 +137,19 @@ export async function initDb() {
       UNIQUE (vk_user_id, logged_date)
     );
 
+    -- §13: продуктовые и научные события без персональных данных.
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id SERIAL PRIMARY KEY,
+      user_hash TEXT NOT NULL,
+      event TEXT NOT NULL,
+      screen TEXT,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_event_created
+      ON analytics_events (event, created_at DESC);
+
     CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
       token_hash TEXT PRIMARY KEY,
       vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,

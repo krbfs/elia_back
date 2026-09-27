@@ -71,6 +71,13 @@ import {
 } from './mood/mood.js';
 import { logTechniqueUsage, parseStressLevel, usedTechniqueIds } from './technique/usage.js';
 import {
+  ANALYTICS_EVENTS,
+  analyticsSummary,
+  isAnalyticsEvent,
+  logAnalyticsEvent,
+  pruneAnalyticsEvents,
+} from './analytics/events.js';
+import {
   CARE_TRIGGER_TEXT,
   careTriggerDue,
   isStressCheckDue,
@@ -1133,6 +1140,34 @@ app.get('/care-trigger', async (_req, res) => {
   res.json({ text: CARE_TRIGGER_TEXT });
 });
 
+/**
+ * §13: приём продуктовых событий. Идентификатор хешируется на сервере,
+ * payload фильтруется по белому списку — тексты и заметки сюда не попадают.
+ */
+app.post('/analytics/event', async (req, res) => {
+  const { vk_user_id, event, screen, payload } = req.body ?? {};
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+  if (!isAnalyticsEvent(event)) {
+    res.status(400).json({ error: 'unknown event', allowed: ANALYTICS_EVENTS });
+    return;
+  }
+
+  await logAnalyticsEvent({ vkUserId: vk_user_id, event, screen, payload });
+  res.status(204).end();
+});
+
+app.get('/analytics/summary', requireAuth, async (_req, res) => {
+  if (process.env.ENABLE_ADMIN !== 'true') {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  res.json({ events: await analyticsSummary(), retention_days: 180 });
+});
+
 app.post('/epds', async (req, res) => {
   const { vk_user_id, answers } = req.body ?? {};
 
@@ -1254,6 +1289,17 @@ async function main() {
   ensureCatalogSeeded().catch((error) => {
     console.error('Catalog seed failed:', error);
   });
+
+  // §13: подробные события живут 180 дней. Чистим при старте и раз в сутки.
+  const pruneAnalytics = () =>
+    pruneAnalyticsEvents()
+      .then((removed) => {
+        if (removed > 0) console.log(`analytics: удалено старых событий — ${removed}`);
+      })
+      .catch((error) => console.error('analytics prune failed:', error));
+
+  void pruneAnalytics();
+  setInterval(pruneAnalytics, 24 * 60 * 60 * 1000).unref();
 }
 
 main().catch((error) => {
