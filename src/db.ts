@@ -195,6 +195,9 @@ export async function initDb() {
 
     ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_code TEXT;
     ALTER TABLE profiles ADD COLUMN IF NOT EXISTS psychotype_updated_at TIMESTAMPTZ;
+    -- Ответы 27.09: триггер заботы показываем один раз, стресс-замер — не чаще раза в день.
+    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS care_trigger_shown BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stress_checked_date TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS catalog_id INTEGER UNIQUE;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS slug TEXT;
     ALTER TABLE techniques ADD COLUMN IF NOT EXISTS is_premium BOOLEAN NOT NULL DEFAULT FALSE;
@@ -257,6 +260,8 @@ export type ProfileRow = {
   base_type: string | null;
   psychotype_code: string | null;
   psychotype_updated_at?: Date | string | null;
+  care_trigger_shown?: boolean;
+  stress_checked_date?: string | null;
   secondary_type: string | null;
   scores_json: string | null;
   platform: string | null;

@@ -70,6 +70,13 @@ import {
   saveMoodEntry,
 } from './mood/mood.js';
 import { logTechniqueUsage, parseStressLevel, usedTechniqueIds } from './technique/usage.js';
+import {
+  CARE_TRIGGER_TEXT,
+  careTriggerDue,
+  isStressCheckDue,
+  markCareTriggerShown,
+  markStressChecked,
+} from './care/careTrigger.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
@@ -100,6 +107,7 @@ app.use('/media', express.static(mediaDir, { maxAge: '7d' }));
 async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: number) {
   // §10.2: зелёный уровень ловит и устойчивый стресс, и снижение настроения 3 дня подряд.
   const freeUsage = await getFreeUsage(vkUserId);
+  const careTrigger = await careTriggerDue(vkUserId, row);
   const [sustainedStress, sustainedLowMood] =
     row?.crisis_level === 'green'
       ? await Promise.all([hasSustainedHighStress(vkUserId), hasSustainedLowMood(vkUserId)])
@@ -112,6 +120,8 @@ async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: numbe
     free_red_limit: FREE_DAILY_RED_LIMIT,
     free_yellow_week: freeUsage.yellowWeek,
     free_yellow_limit: FREE_WEEKLY_YELLOW_LIMIT,
+    care_trigger: careTrigger,
+    stress_check_due: isStressCheckDue(row),
     green_nudge: greenNudge,
     green_nudge_reason: sustainedStress
       ? ('sustained_stress_3d' as const)
@@ -1090,6 +1100,9 @@ app.post('/stress/report', async (req, res) => {
     );
   }
 
+  // Ответы 27.09, п. 4: замер на входе показываем не чаще раза в день.
+  await markStressChecked(vk_user_id);
+
   const row = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
     [vk_user_id],
@@ -1099,6 +1112,25 @@ app.post('/stress/report', async (req, res) => {
     profile: await buildProfileResponse(row, vk_user_id),
     crisis_redirect: stress >= 9 ? 'red' : null,
   });
+});
+
+app.post('/care-trigger/dismiss', async (req, res) => {
+  const { vk_user_id } = req.body ?? {};
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  await markCareTriggerShown(vk_user_id);
+  const row = await queryOne<ProfileRow>(
+    'SELECT * FROM profiles WHERE vk_user_id = $1',
+    [vk_user_id],
+  );
+  res.json({ profile: await buildProfileResponse(row, vk_user_id) });
+});
+
+app.get('/care-trigger', async (_req, res) => {
+  res.json({ text: CARE_TRIGGER_TEXT });
 });
 
 app.post('/epds', async (req, res) => {
