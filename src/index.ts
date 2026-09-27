@@ -70,6 +70,7 @@ import {
   saveMoodEntry,
 } from './mood/mood.js';
 import { logTechniqueUsage, parseStressLevel, usedTechniqueIds } from './technique/usage.js';
+import { getScreenText, listScreenIds } from './content/screenTexts.js';
 import {
   ANALYTICS_EVENTS,
   analyticsSummary,
@@ -1144,6 +1145,24 @@ app.get('/care-trigger', async (_req, res) => {
  * §13: приём продуктовых событий. Идентификатор хешируется на сервере,
  * payload фильтруется по белому списку — тексты и заметки сюда не попадают.
  */
+/**
+ * Ответы 27.09, п. 7: копирайт живёт в screen_texts.json и отдаётся фронту,
+ * чтобы правки текстов не требовали релиза. Кризисные экраны (#22, #23)
+ * остаются захардкоженными во фронте — они обязаны работать оффлайн.
+ */
+app.get('/screen-texts/:screen_id', async (req, res) => {
+  const screen = getScreenText(req.params.screen_id);
+  if (!screen) {
+    res.status(404).json({ error: 'screen not found' });
+    return;
+  }
+  res.json({ screen });
+});
+
+app.get('/screen-texts', async (_req, res) => {
+  res.json({ screens: listScreenIds() });
+});
+
 app.post('/analytics/event', async (req, res) => {
   const { vk_user_id, event, screen, payload } = req.body ?? {};
   if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
