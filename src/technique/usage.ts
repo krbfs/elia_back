@@ -1,7 +1,16 @@
-import { queryOne, type TechniqueUsageRow } from '../db.js';
+import { queryAll, queryOne, type TechniqueUsageRow } from '../db.js';
 import { stressZone } from '../recommend.js';
 
 export type { TechniqueUsageRow };
+
+/** id техник, которые женщина уже проходила: новизна даёт +0.5 в скоринге. */
+export async function usedTechniqueIds(vkUserId: number): Promise<number[]> {
+  const rows = await queryAll<{ technique_id: number }>(
+    'SELECT DISTINCT technique_id FROM technique_usage WHERE vk_user_id = $1',
+    [vkUserId],
+  );
+  return rows.map((row) => row.technique_id);
+}
 
 export function parseStressLevel(value: unknown): number | null {
   if (typeof value !== 'number' || !Number.isFinite(value)) return null;

@@ -10,6 +10,10 @@ export type RecommendInput = {
   stress: number;
   profile?: ProfileRow;
   context?: string | null;
+  /** Ответ на вопрос «Что тебе сейчас больше всего нужно?» (экран #5). */
+  feeling?: string | null;
+  /** id техник, которые женщина уже проходила. */
+  usedTechniqueIds?: number[];
   topN?: number;
   /** Техники, открытые подарком (§9.4): премиум-замок для них не действует. */
   unlockedTechniqueIds?: number[];
@@ -25,9 +29,35 @@ export type RecommendResult = {
 
 export type ScoreOptions = {
   context?: string | null;
-  stressReaction?: string | null;
+  /** Одна реакция или несколько — вариант «хочу быть рядом» покрывает две. */
+  stressReaction?: string | string[] | null;
   complexProfile?: boolean;
+  /** Техники, которые женщина уже проходила: новизна даёт +0.5 (ответы 27.09, п. 2). */
+  usedTechniqueIds?: Set<number> | number[];
 };
+
+/**
+ * Уточняющий вопрос «Что тебе сейчас больше всего нужно?» (экран #5) → теги каталога.
+ * Финальный маппинг из ответов 27.09, п. 1: выбор женщины важнее реакции по психотипу.
+ */
+export const STRESS_REACTION_MAPPING: Record<string, { reactions: string[]; psychotypes: string[] }> =
+  {
+    active_action: { reactions: ['Бей'], psychotypes: ['Индивидуалист', 'Прагматик'] },
+    freeze: { reactions: ['Замри'], psychotypes: ['Эмпат', 'Аналитик'] },
+    social_safety: {
+      reactions: ['Мимикрия', 'Сливайся с толпой'],
+      psychotypes: ['Эстет', 'Консерватор'],
+    },
+    verbal_switch: {
+      reactions: ['Дефлексия', 'Коммуницируй'],
+      psychotypes: ['Инноватор', 'Лидер Мнений'],
+    },
+  };
+
+export function reactionsForFeeling(feeling: string | null | undefined): string[] | null {
+  if (!feeling) return null;
+  return STRESS_REACTION_MAPPING[feeling]?.reactions ?? null;
+}
 
 /** Стресс-реакция базового психотипа (docs/02, 06). */
 export const PSYCHOTYPE_STRESS_REACTIONS: Record<string, string> = {
@@ -42,6 +72,9 @@ export const PSYCHOTYPE_STRESS_REACTIONS: Record<string, string> = {
 };
 
 const RED_MAX_AUDIO_SEC = 180;
+/** Бонусы из ответов 27.09, п. 2. */
+export const NOVELTY_BONUS = 0.5;
+export const PREMIUM_BONUS = 0.3;
 const COMPLEX_TECHNIQUE_KEYWORDS = ['mindfulness', 'майндфул', 'meditation', 'медитац', ' act', 'cbt'];
 
 export function stressZone(stress: number): StressZone {
@@ -198,13 +231,27 @@ function contextMatches(row: TechniqueRow, context: string | null | undefined): 
   return tagContexts.includes('any') || tagContexts.includes(context) || row.context === context;
 }
 
-function stressReactionMatches(row: TechniqueRow, userReaction: string | null | undefined): boolean {
-  const reactions =
-    (parseTags(row).stress_reaction as string[] | undefined) ??
-    (row.reaction ? [row.reaction] : ['any']);
+function userReactions(value: string | string[] | null | undefined): string[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function stressReactionMatches(
+  row: TechniqueRow,
+  userReaction: string | string[] | null | undefined,
+): boolean {
+  const reactions = techniqueReactions(row);
   if (reactions.includes('any')) return true;
-  if (!userReaction) return false;
-  return reactions.includes(userReaction);
+  const mine = userReactions(userReaction);
+  if (mine.length === 0) return false;
+  return mine.some((value) => reactions.includes(value));
+}
+
+function techniqueReactions(row: TechniqueRow): string[] {
+  return (
+    (parseTags(row).stress_reaction as string[] | undefined) ??
+    (row.reaction ? [row.reaction] : ['any'])
+  );
 }
 
 export function isPremiumLocked(row: TechniqueRow, isPremium: boolean): boolean {
@@ -270,12 +317,10 @@ export function scoreTechnique(
     score += 1;
   }
 
-  const reactions =
-    (parseTags(row).stress_reaction as string[] | undefined) ??
-    (row.reaction ? [row.reaction] : ['any']);
+  const reactions = techniqueReactions(row);
   if (reactions.includes('any')) {
     score += 1;
-  } else if (opts.stressReaction && reactions.includes(opts.stressReaction)) {
+  } else if (userReactions(opts.stressReaction).some((value) => reactions.includes(value))) {
     score += 2;
   }
 
@@ -288,6 +333,16 @@ export function scoreTechnique(
     score += 1;
   }
 
+  // Ответы 27.09, п. 2: новизна +0.5, премиум-техника +0.3 — оба слабее психотипа (+3).
+  const used = opts.usedTechniqueIds;
+  const alreadyUsed = used instanceof Set ? used.has(row.id) : Boolean(used?.includes(row.id));
+  if (!alreadyUsed) {
+    score += NOVELTY_BONUS;
+  }
+  if (row.is_premium || parseTags(row).is_premium === true) {
+    score += PREMIUM_BONUS;
+  }
+
   return score;
 }
 
@@ -295,12 +350,21 @@ function rankPool(
   pool: TechniqueRow[],
   profile: ProfileRow | undefined,
   psychotypeField: 'base_type' | 'secondary_type',
-  options?: { maxDuration?: number; context?: string | null; complexProfile?: boolean },
+  options?: {
+    maxDuration?: number;
+    context?: string | null;
+    complexProfile?: boolean;
+    feeling?: string | null;
+    usedTechniqueIds?: Set<number>;
+  },
 ): TechniqueRow[] {
   const psychotype = profile?.[psychotypeField] ?? null;
   const trimester = profile?.trimester ?? null;
   const complexProfile = options?.complexProfile ?? isComplexProfile(profile);
-  const stressReaction = stressReactionForPsychotype(complexProfile ? null : psychotype);
+  // Выбор женщины на экране #5 важнее дефолтной реакции психотипа.
+  const stressReaction: string | string[] | null =
+    reactionsForFeeling(options?.feeling) ??
+    stressReactionForPsychotype(complexProfile ? null : psychotype);
 
   const ranked = pool
     .map((technique) => ({
@@ -309,6 +373,7 @@ function rankPool(
         context: options?.context,
         stressReaction,
         complexProfile,
+        usedTechniqueIds: options?.usedTechniqueIds,
       }),
     }))
     .filter(({ score, technique }) => {
@@ -354,9 +419,12 @@ export function recommendTechniques(
       (!complexProfile || isUniversalTechnique(row)),
   );
 
+  const used = new Set(input.usedTechniqueIds ?? []);
   const ranked = rankPool(pool, input.profile, 'base_type', {
     context: input.context,
     complexProfile,
+    feeling: input.feeling,
+    usedTechniqueIds: used,
   });
   const topN = input.topN ?? 5;
   const techniques = ranked.slice(0, topN);
@@ -368,6 +436,8 @@ export function recommendTechniques(
       maxDuration: 120,
       context: input.context,
       complexProfile: false,
+      feeling: input.feeling,
+      usedTechniqueIds: used,
     });
     cascade = cascadeRanked.find((item) => item.id !== technique?.id) ?? null;
   }

@@ -69,7 +69,7 @@ import {
   isValidMoodScore,
   saveMoodEntry,
 } from './mood/mood.js';
-import { logTechniqueUsage, parseStressLevel } from './technique/usage.js';
+import { logTechniqueUsage, parseStressLevel, usedTechniqueIds } from './technique/usage.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
@@ -434,6 +434,7 @@ async function handleRecommend(req: express.Request, res: express.Response) {
   const vkUserId = Number(req.query.vk_user_id);
   const stress = Number(req.query.stress ?? req.query.stress_level);
   const context = typeof req.query.context === 'string' ? req.query.context : null;
+  const feeling = typeof req.query.feeling === 'string' ? req.query.feeling : null;
 
   if (!Number.isFinite(vkUserId)) {
     res.status(400).json({ error: 'vk_user_id required' });
@@ -474,6 +475,8 @@ async function handleRecommend(req: express.Request, res: express.Response) {
     stress,
     profile,
     context,
+    feeling,
+    usedTechniqueIds: await usedTechniqueIds(vkUserId),
     unlockedTechniqueIds,
   });
 
