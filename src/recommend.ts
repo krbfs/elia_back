@@ -4,7 +4,7 @@ import type { ExpressionLevel } from './psychotype/types.js';
 
 export type StressZone = 'red' | 'yellow' | 'green';
 
-export type TechniqueRow = DbTechniqueRow & { level: StressZone };
+export type TechniqueRow = DbTechniqueRow;
 
 export type RecommendInput = {
   stress: number;
@@ -212,6 +212,12 @@ export function isPremiumLocked(row: TechniqueRow, isPremium: boolean): boolean 
   return row.is_premium || parseTags(row).is_premium === true;
 }
 
+/** Аудио-техники — ценность подписки (ответы 27.09, п. 8): без Premium только текст. */
+export function isAudioPremiumLocked(row: TechniqueRow, isPremium: boolean): boolean {
+  if (isPremium) return false;
+  return Boolean(row.audio_url) || formatsFor(row).includes('audio');
+}
+
 export function isRedZoneBlocked(row: TechniqueRow, zone: StressZone): boolean {
   if (zone !== 'red') return false;
 
@@ -341,6 +347,7 @@ export function recommendTechniques(
     (row) =>
       techniqueLevels(row).includes(zone) &&
       (!isPremiumLocked(row, isPremium) || unlocked.has(row.id)) &&
+      (!isAudioPremiumLocked(row, isPremium) || unlocked.has(row.id)) &&
       !isRedZoneBlocked(row, zone) &&
       !isNonSensorimotorBlocked(row, zone, input.profile?.trimester) &&
       !isYellowComplexTechniqueBlocked(row, input.profile?.crisis_level) &&

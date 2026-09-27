@@ -52,10 +52,11 @@ import {
 } from './gift/gift.js';
 import { scoreEpdsAnswers } from './epds/score.js';
 import {
-  FREE_DAILY_EMERGENCY_LIMIT,
   canUseTechnique,
-  getDailyUsage,
-  incrementDailyUsage,
+  getFreeUsage,
+  remainingFor,
+  FREE_DAILY_RED_LIMIT,
+  FREE_WEEKLY_YELLOW_LIMIT,
 } from './billing/usage.js';
 import { logCrisisIncident } from './crisis/incidents.js';
 import { recordStressLevel } from './crisis/recordStress.js';
@@ -98,6 +99,7 @@ app.use('/media', express.static(mediaDir, { maxAge: '7d' }));
 
 async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: number) {
   // §10.2: зелёный уровень ловит и устойчивый стресс, и снижение настроения 3 дня подряд.
+  const freeUsage = await getFreeUsage(vkUserId);
   const [sustainedStress, sustainedLowMood] =
     row?.crisis_level === 'green'
       ? await Promise.all([hasSustainedHighStress(vkUserId), hasSustainedLowMood(vkUserId)])
@@ -106,9 +108,10 @@ async function buildProfileResponse(row: ProfileRow | undefined, vkUserId: numbe
 
   return {
     ...enrichProfileResponse(row, vkUserId),
-    daily_techniques_used: getDailyUsage(row).count,
-    daily_techniques_remaining: getDailyUsage(row).remaining,
-    daily_techniques_limit: FREE_DAILY_EMERGENCY_LIMIT,
+    free_red_today: freeUsage.redToday,
+    free_red_limit: FREE_DAILY_RED_LIMIT,
+    free_yellow_week: freeUsage.yellowWeek,
+    free_yellow_limit: FREE_WEEKLY_YELLOW_LIMIT,
     green_nudge: greenNudge,
     green_nudge_reason: sustainedStress
       ? ('sustained_stress_3d' as const)
@@ -453,13 +456,15 @@ async function handleRecommend(req: express.Request, res: express.Response) {
 
   const zone = stressZone(stress);
   const unlockedTechniqueIds = await giftedTechniqueIds(vkUserId);
-  const access = canUseTechnique(profile, zone);
+  const freeUsage = await getFreeUsage(vkUserId);
+  const access = canUseTechnique(profile, zone, freeUsage);
   // §9.4: активный подарок открывает доступ даже без подписки.
   if (!access.allowed && unlockedTechniqueIds.length === 0) {
     res.status(402).json({
-      error: access.reason ?? 'premium_required',
+      error: access.reason,
       is_premium: Boolean(profile?.is_premium),
-      daily_remaining: getDailyUsage(profile).remaining,
+      zone,
+      free_remaining: remainingFor(profile, zone, freeUsage),
     });
     return;
   }
@@ -551,7 +556,6 @@ app.post('/techniques/complete', async (req, res) => {
     );
   }
 
-  await incrementDailyUsage(vk_user_id, existing);
   await recordStressLevel(vk_user_id, stressAfter);
 
   const updated = await queryOne<ProfileRow>(

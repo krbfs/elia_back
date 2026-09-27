@@ -213,7 +213,8 @@ export type TechniqueRow = {
   text: string;
   duration_sec: number;
   audio_url: string | null;
-  level: string;
+  /** Зона стресса техники — совпадает с StressZone в recommend.ts. */
+  level: 'red' | 'yellow' | 'green';
   context: string;
   psychotypes_json: string;
   reaction: string;

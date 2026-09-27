@@ -1,26 +1,36 @@
-import { query, type ProfileRow } from '../db.js';
+import { queryOne, type ProfileRow } from '../db.js';
+import type { StressZone } from '../recommend.js';
 
-export const FREE_DAILY_EMERGENCY_LIMIT = 1;
+/**
+ * Модель доступа (ответы 27.09, п. 8):
+ *   зелёная зона  — бесплатно без ограничений (формируем привычку к профилактике);
+ *   жёлтая зона   — бесплатно 3 техники в неделю;
+ *   красная зона  — бесплатно 1 экстренная техника в сутки;
+ *   аудио-техники — только Premium.
+ * Лимиты считаем по зоне, а не по всем прохождениям: зелёная техника утром
+ * не должна отнимать экстренную технику вечером.
+ */
+export const FREE_DAILY_RED_LIMIT = 1;
+export const FREE_WEEKLY_YELLOW_LIMIT = 3;
 
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+export type FreeUsage = {
+  redToday: number;
+  yellowWeek: number;
+};
 
-export function getDailyUsage(row: ProfileRow | undefined) {
-  const today = todayKey();
-  const date = row?.daily_techniques_date ?? null;
-  const count = date === today ? (row?.daily_techniques_count ?? 0) : 0;
-  return {
-    date: today,
-    count,
-    remaining: Math.max(0, FREE_DAILY_EMERGENCY_LIMIT - count),
-  };
-}
+export type AccessReason = 'crisis_red' | 'daily_limit' | 'weekly_limit';
+
+export type AccessDecision =
+  | { allowed: true }
+  | { allowed: false; reason: AccessReason };
+
+export const EMPTY_USAGE: FreeUsage = { redToday: 0, yellowWeek: 0 };
 
 export function canUseTechnique(
   profile: ProfileRow | undefined,
-  stressZone: 'red' | 'yellow' | 'green',
-): { allowed: boolean; reason?: 'premium_required' | 'daily_limit' | 'crisis_red' } {
+  zone: StressZone,
+  usage: FreeUsage = EMPTY_USAGE,
+): AccessDecision {
   if (profile?.crisis_level === 'red') {
     return { allowed: false, reason: 'crisis_red' };
   }
@@ -29,33 +39,46 @@ export function canUseTechnique(
     return { allowed: true };
   }
 
-  if (stressZone !== 'red') {
-    return { allowed: false, reason: 'premium_required' };
+  if (zone === 'green') {
+    return { allowed: true };
   }
 
-  const usage = getDailyUsage(profile);
-  if (usage.count >= FREE_DAILY_EMERGENCY_LIMIT) {
-    return { allowed: false, reason: 'daily_limit' };
+  if (zone === 'yellow') {
+    return usage.yellowWeek >= FREE_WEEKLY_YELLOW_LIMIT
+      ? { allowed: false, reason: 'weekly_limit' }
+      : { allowed: true };
   }
 
-  return { allowed: true };
+  return usage.redToday >= FREE_DAILY_RED_LIMIT
+    ? { allowed: false, reason: 'daily_limit' }
+    : { allowed: true };
 }
 
-export async function incrementDailyUsage(vkUserId: number, profile: ProfileRow | undefined) {
-  if (profile?.is_premium) return;
+/** Сколько бесплатных техник осталось в зоне; null — без ограничений. */
+export function remainingFor(
+  profile: ProfileRow | undefined,
+  zone: StressZone,
+  usage: FreeUsage = EMPTY_USAGE,
+): number | null {
+  if (profile?.is_premium || zone === 'green') return null;
+  if (zone === 'yellow') {
+    return Math.max(0, FREE_WEEKLY_YELLOW_LIMIT - usage.yellowWeek);
+  }
+  return Math.max(0, FREE_DAILY_RED_LIMIT - usage.redToday);
+}
 
-  const today = todayKey();
-  const existing =
-    profile?.daily_techniques_date === today
-      ? (profile?.daily_techniques_count ?? 0)
-      : 0;
-
-  await query(
-    `UPDATE profiles
-     SET daily_techniques_date = $1,
-         daily_techniques_count = $2,
-         updated_at = NOW()
-     WHERE vk_user_id = $3`,
-    [today, existing + 1, vkUserId],
+export async function getFreeUsage(vkUserId: number): Promise<FreeUsage> {
+  const row = await queryOne<{ red_today: number; yellow_week: number }>(
+    `SELECT
+       COUNT(*) FILTER (WHERE zone = 'red' AND created_at >= date_trunc('day', NOW())) AS red_today,
+       COUNT(*) FILTER (WHERE zone = 'yellow' AND created_at >= NOW() - INTERVAL '7 days') AS yellow_week
+     FROM technique_usage
+     WHERE vk_user_id = $1`,
+    [vkUserId],
   );
+
+  return {
+    redToday: Number(row?.red_today ?? 0),
+    yellowWeek: Number(row?.yellow_week ?? 0),
+  };
 }

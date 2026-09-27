@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { canUseTechnique } from './billing/usage.js';
 import type { ProfileRow } from './db.js';
 import {
+  isAudioPremiumLocked,
   isPremiumLocked,
   isRedZoneBlocked,
   isYellowComplexTechniqueBlocked,
@@ -250,12 +251,72 @@ describe('recommend stage 3', () => {
     ).toBeNull();
   });
 
-  it('TC-203: free user cannot use yellow zone', () => {
+  it('TC-203: лимиты бесплатного доступа по зонам (ответы 27.09, п. 8)', () => {
     const freeProfile = profile({ vk_user_id: 1, is_premium: false });
-    expect(canUseTechnique(freeProfile, 'yellow')).toEqual({
-      allowed: false,
-      reason: 'premium_required',
+
+    // Зелёная зона — без ограничений: профилактика должна входить в привычку.
+    expect(canUseTechnique(freeProfile, 'green', { redToday: 9, yellowWeek: 9 })).toEqual({
+      allowed: true,
     });
+
+    expect(canUseTechnique(freeProfile, 'yellow', { redToday: 0, yellowWeek: 2 })).toEqual({
+      allowed: true,
+    });
+    expect(canUseTechnique(freeProfile, 'yellow', { redToday: 0, yellowWeek: 3 })).toEqual({
+      allowed: false,
+      reason: 'weekly_limit',
+    });
+
+    expect(canUseTechnique(freeProfile, 'red', { redToday: 0, yellowWeek: 3 })).toEqual({
+      allowed: true,
+    });
+    expect(canUseTechnique(freeProfile, 'red', { redToday: 1, yellowWeek: 0 })).toEqual({
+      allowed: false,
+      reason: 'daily_limit',
+    });
+
+    // Premium снимает любые лимиты, кризис перебивает всё.
+    expect(
+      canUseTechnique(profile({ vk_user_id: 1, is_premium: true }), 'red', {
+        redToday: 5,
+        yellowWeek: 5,
+      }),
+    ).toEqual({ allowed: true });
+    expect(
+      canUseTechnique(profile({ vk_user_id: 1, crisis_level: 'red' }), 'red'),
+    ).toEqual({ allowed: false, reason: 'crisis_red' });
+  });
+
+  it('TC-203: аудио-техники доступны только в Premium', () => {
+    const audio = technique({
+      id: 1,
+      title: 'Аудио-медитация',
+      level: 'green',
+      audio_url: '/media/techniques/1_audio.mp3',
+      tags_json: JSON.stringify({ level: ['green'], format: ['audio'] }),
+    });
+    const text = technique({
+      id: 2,
+      title: 'Текстовая',
+      level: 'green',
+      tags_json: JSON.stringify({ level: ['green'], format: ['text'] }),
+    });
+
+    expect(isAudioPremiumLocked(audio, false)).toBe(true);
+    expect(isAudioPremiumLocked(audio, true)).toBe(false);
+    expect(isAudioPremiumLocked(text, false)).toBe(false);
+
+    const free = recommendTechniques([audio, text], {
+      stress: 2,
+      profile: profile({ vk_user_id: 1, is_premium: false }),
+    });
+    expect(free.techniques.map((row) => row.id)).toEqual([2]);
+
+    const premium = recommendTechniques([audio, text], {
+      stress: 2,
+      profile: profile({ vk_user_id: 1, is_premium: true }),
+    });
+    expect(premium.techniques.map((row) => row.id)).toHaveLength(2);
   });
 
   it('TC-204: psychotype-specific technique outranks universal', () => {
