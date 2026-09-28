@@ -150,6 +150,21 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_analytics_events_event_created
       ON analytics_events (event, created_at DESC);
 
+    -- Журнал согласий: правила VK Mini Apps §1.1.7 требуют в 7 дней подтвердить
+    -- основание обработки, поэтому запись живёт и после удаления профиля (без FK).
+    CREATE TABLE IF NOT EXISTS consents (
+      id SERIAL PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL,
+      terms_version TEXT NOT NULL,
+      privacy_version TEXT NOT NULL,
+      platform TEXT,
+      accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      revoked_at TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_consents_user_accepted
+      ON consents (vk_user_id, accepted_at DESC);
+
     CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
       token_hash TEXT PRIMARY KEY,
       vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,
@@ -295,6 +310,16 @@ export type UserRow = {
   last_name: string | null;
   created_at: Date | string;
   updated_at: Date | string;
+};
+
+export type ConsentRow = {
+  id: number;
+  vk_user_id: number;
+  terms_version: string;
+  privacy_version: string;
+  platform: string | null;
+  accepted_at: Date | string;
+  revoked_at: Date | string | null;
 };
 
 export type TechniqueUsageRow = {

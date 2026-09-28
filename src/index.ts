@@ -6,6 +6,7 @@ import {
   query,
   queryAll,
   queryOne,
+  type ConsentRow,
   type PartnerProfileRow,
   type ProfileRow,
   type TechniqueRow,
@@ -238,6 +239,56 @@ app.post('/users/sync', async (req, res) => {
   );
 
   res.json({ user });
+});
+
+/**
+ * Журнал согласий: пишем факт принятия соглашения и политики до создания профиля.
+ * Правила VK Mini Apps §1.1.7 — основание обработки нужно подтвердить в 7 дней.
+ */
+app.post('/consents', async (req, res) => {
+  const { vk_user_id, terms_version, privacy_version, platform } = req.body ?? {};
+
+  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  if (typeof terms_version !== 'string' || !terms_version.trim()) {
+    res.status(400).json({ error: 'terms_version is required' });
+    return;
+  }
+
+  if (typeof privacy_version !== 'string' || !privacy_version.trim()) {
+    res.status(400).json({ error: 'privacy_version is required' });
+    return;
+  }
+
+  const consent = await queryOne<ConsentRow>(
+    `INSERT INTO consents (vk_user_id, terms_version, privacy_version, platform)
+     VALUES ($1, $2, $3, $4)
+     RETURNING *`,
+    [vk_user_id, terms_version.trim(), privacy_version.trim(), platform ?? null],
+  );
+
+  res.json({ consent });
+});
+
+app.get('/consents', async (req, res) => {
+  const vkUserId = Number(req.query.vk_user_id);
+  if (!Number.isFinite(vkUserId)) {
+    res.status(400).json({ error: 'vk_user_id must be a number' });
+    return;
+  }
+
+  const consent = await queryOne<ConsentRow>(
+    `SELECT * FROM consents
+     WHERE vk_user_id = $1 AND revoked_at IS NULL
+     ORDER BY accepted_at DESC
+     LIMIT 1`,
+    [vkUserId],
+  );
+
+  res.json({ consent: consent ?? null });
 });
 
 app.get('/questions', async (_req, res) => {
@@ -1262,6 +1313,11 @@ app.delete('/profile', async (req, res) => {
   await query('DELETE FROM partner_profiles WHERE user_vk_id = $1', [vk_user_id]);
   await query('DELETE FROM profiles WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM users WHERE vk_user_id = $1', [vk_user_id]);
+  // Саму запись согласия не удаляем: она подтверждает, что обработка была правомерной.
+  await query(
+    'UPDATE consents SET revoked_at = NOW() WHERE vk_user_id = $1 AND revoked_at IS NULL',
+    [vk_user_id],
+  );
 
   res.json({ ok: true });
 });
