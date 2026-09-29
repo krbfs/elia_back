@@ -51,6 +51,36 @@ async function storeRefreshToken(vkUserId: number, refreshToken: string) {
   );
 }
 
+export async function authenticateLaunchParams(params: {
+  launchParams: string;
+  firstName?: string;
+  lastName?: string;
+}): Promise<AuthTokens> {
+  const secret = process.env.VK_SECURE_KEY?.trim();
+  if (!secret) {
+    throw new Error('VK_SECURE_KEY is not configured');
+  }
+
+  const { verifyLaunchParams, antibotLog } = await import('./launchParams.js');
+  const verified = verifyLaunchParams(params.launchParams, secret);
+  if (!verified) {
+    antibotLog('bad_sign');
+    throw new Error('Invalid launch signature');
+  }
+
+  const user = await upsertUser(verified.vkUserId, params.firstName, params.lastName);
+  const refreshToken = issueRefreshToken();
+  await storeRefreshToken(user.vk_user_id, refreshToken);
+
+  return {
+    access_token: issueAccessToken(user.vk_user_id),
+    refresh_token: refreshToken,
+    token_type: 'Bearer',
+    expires_in: TOKEN_TTL_SEC,
+    user,
+  };
+}
+
 export async function authenticateWithVkToken(accessToken: string): Promise<AuthTokens> {
   const vkUser = await verifyVkAccessToken(accessToken);
   const user = await upsertUser(vkUser.id, vkUser.first_name, vkUser.last_name);

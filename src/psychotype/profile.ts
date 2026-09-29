@@ -18,21 +18,19 @@ export type StoredPsychotype = {
 };
 
 export function serializePsychotypeResult(result: PsychotypeResult) {
+  const sliderScores: Partial<PsychotypeResult['scores']> = {};
+  for (const trait of result.base_traits) {
+    sliderScores[trait] = result.scores[trait];
+  }
+
   return {
     base_type: result.base_type,
     psychotype_code: result.psychotype_code,
     secondary_type: result.secondary_type,
-    scores: result.scores,
-    raw_scores: result.raw_scores,
-    top_traits: result.top_traits,
+    scores: sliderScores,
     base_traits: result.base_traits,
-    secondary_traits: result.secondary_traits,
-    triad: result.triad,
-    triad_status: result.triad_status,
-    triad_variant: result.triad_variant,
     expression_level: result.expression_level,
-    conflict_profile: result.conflict_profile,
-    conflict_reason: result.conflict_reason,
+    triad_status: result.triad_status,
     recommendation: result.recommendation,
   };
 }

@@ -16,10 +16,14 @@ import { recommendTechniques, serializeTechnique, stressZone } from './recommend
 import { ensureCatalogSeeded, getAdminSummary } from './seed/loadCatalog.js';
 import {
   authenticateDevUser,
+  authenticateLaunchParams,
   authenticateWithVkToken,
   refreshAuth,
 } from './auth/service.js';
-import { requireAuth, type AuthedRequest } from './auth/middleware.js';
+import { attachAuth, allowUnsignedUserId, requireAuth, requireUser, type AuthedRequest } from './auth/middleware.js';
+import { rateLimit, rateLimitCrisis } from './auth/rateLimit.js';
+import { antibotLog } from './auth/launchParams.js';
+import { consumeQuizSession, createQuizSession } from './quiz/session.js';
 import {
   calculatePsychotype,
   calculateSubjectivePsychotype,
@@ -75,6 +79,7 @@ import { getScreenText, listScreenIds } from './content/screenTexts.js';
 import {
   ANALYTICS_EVENTS,
   analyticsSummary,
+  hashUserId,
   isAnalyticsEvent,
   logAnalyticsEvent,
   pruneAnalyticsEvents,
@@ -96,18 +101,55 @@ const corsOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ]);
+
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true;
+  if (corsOrigins.has(origin)) return true;
+  if (/\.run\.app$/i.test(origin)) return true;
+  if (/\.(vk-apps\.com|vk\.ru|vk\.com|userapi\.com)$/i.test(origin)) return true;
+  return false;
+}
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || corsOrigins.has(origin) || /\.run\.app$/i.test(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(null, false);
+      callback(null, isAllowedOrigin(origin));
     },
   }),
 );
-app.use(express.json());
+app.use(express.json({ limit: '32kb' }));
+app.use(attachAuth);
+app.use((req, res, next) => {
+  const authed = req as AuthedRequest;
+  if (typeof authed.vkUserId === 'number') {
+    if (req.body && typeof req.body === 'object') {
+      (req.body as Record<string, unknown>).vk_user_id = authed.vkUserId;
+    }
+    req.query.vk_user_id = String(authed.vkUserId);
+  }
+  next();
+});
+app.use((req, res, next) => {
+  if (allowUnsignedUserId()) {
+    next();
+    return;
+  }
+  const path = req.path;
+  const open =
+    path === '/health' ||
+    path.startsWith('/auth/') ||
+    path.startsWith('/media') ||
+    (req.method === 'GET' && path === '/questions') ||
+    (req.method === 'GET' && path.startsWith('/screen-texts')) ||
+    (req.method === 'GET' && /^\/gift\/[^/]+$/.test(path)) ||
+    (req.method === 'GET' && path === '/partner/invite/validate');
+  if (open || typeof (req as AuthedRequest).vkUserId === 'number') {
+    next();
+    return;
+  }
+  antibotLog('no_auth', { path });
+  res.status(401).json({ error: 'Нужна авторизация' });
+});
 
 // Аудио техник: /media/techniques/{id}_audio.mp3 из audio_scripts.json.
 const mediaDir = process.env.MEDIA_DIR ?? fileURLToPath(new URL('../media', import.meta.url));
@@ -166,6 +208,26 @@ app.post('/auth/verify-vk-token', async (req, res) => {
   }
 });
 
+app.post('/auth/vk-launch', rateLimit('default'), async (req, res) => {
+  const { launch_params, first_name, last_name } = req.body ?? {};
+  if (typeof launch_params !== 'string' || !launch_params.trim()) {
+    res.status(400).json({ error: 'launch_params required' });
+    return;
+  }
+
+  try {
+    const tokens = await authenticateLaunchParams({
+      launchParams: launch_params,
+      firstName: typeof first_name === 'string' ? first_name : undefined,
+      lastName: typeof last_name === 'string' ? last_name : undefined,
+    });
+    res.json(tokens);
+  } catch (error) {
+    antibotLog('bad_sign');
+    res.status(401).json({ error: 'Не удалось войти через VK' });
+  }
+});
+
 app.post('/auth/refresh', async (req, res) => {
   const { refresh_token } = req.body ?? {};
   if (typeof refresh_token !== 'string' || !refresh_token.trim()) {
@@ -209,12 +271,10 @@ app.get('/admin/summary', requireAuth, async (_req, res) => {
 });
 
 app.post('/users/sync', async (req, res) => {
-  const { vk_user_id, first_name, last_name } = req.body ?? {};
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
 
-  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
-    return;
-  }
+  const { first_name, last_name } = req.body ?? {};
 
   const existing = await queryOne<UserRow>(
     'SELECT * FROM users WHERE vk_user_id = $1',
@@ -246,12 +306,10 @@ app.post('/users/sync', async (req, res) => {
  * Правила VK Mini Apps §1.1.7 — основание обработки нужно подтвердить в 7 дней.
  */
 app.post('/consents', async (req, res) => {
-  const { vk_user_id, terms_version, privacy_version, platform } = req.body ?? {};
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
 
-  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
-    return;
-  }
+  const { terms_version, privacy_version, platform } = req.body ?? {};
 
   if (typeof terms_version !== 'string' || !terms_version.trim()) {
     res.status(400).json({ error: 'terms_version is required' });
@@ -274,11 +332,8 @@ app.post('/consents', async (req, res) => {
 });
 
 app.get('/consents', async (req, res) => {
-  const vkUserId = Number(req.query.vk_user_id);
-  if (!Number.isFinite(vkUserId)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
-    return;
-  }
+  const vkUserId = requireUser(req as AuthedRequest, res, req.query as Record<string, unknown>);
+  if (vkUserId == null) return;
 
   const consent = await queryOne<ConsentRow>(
     `SELECT * FROM consents
@@ -312,8 +367,15 @@ app.get('/questions', async (_req, res) => {
   }
 });
 
-app.post('/calculate-psychotype', async (req, res) => {
-  const { vk_user_id, answers, sliders, save_profile, mode } = req.body ?? {};
+app.post('/quiz/start', rateLimit('quiz_start'), async (req, res) => {
+  const vkUserId = requireUser(req as AuthedRequest, res);
+  if (vkUserId == null) return;
+  const session = await createQuizSession(vkUserId);
+  res.json(session);
+});
+
+app.post('/calculate-psychotype', rateLimit('calculate'), async (req, res) => {
+  const { answers, sliders, save_profile, mode, session_id, answered_at } = req.body ?? {};
 
   if (!Array.isArray(answers) || answers.length !== 10) {
     res.status(400).json({ error: 'answers must be an array of 10 option indexes' });
@@ -329,6 +391,20 @@ app.post('/calculate-psychotype', async (req, res) => {
     return;
   }
 
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
+
+  const session = await consumeQuizSession({
+    sessionId: session_id,
+    vkUserId: vk_user_id,
+    answeredAt: answered_at,
+    saveProfile: Boolean(save_profile) || mode === 'subjective',
+  });
+  if (!session.ok) {
+    res.status(400).json({ error: session.error });
+    return;
+  }
+
   try {
     const questions = await getCachedQuestions();
     const raw = scoreFromAnswers(answers, questions);
@@ -339,11 +415,6 @@ app.post('/calculate-psychotype', async (req, res) => {
     const payload = serializePsychotypeResult(result);
 
     if (save_profile) {
-      if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-        res.status(400).json({ error: 'vk_user_id required when save_profile=true' });
-        return;
-      }
-
       await query(
         `INSERT INTO users (vk_user_id) VALUES ($1)
          ON CONFLICT (vk_user_id) DO UPDATE SET updated_at = NOW()`,
@@ -370,11 +441,8 @@ app.post('/calculate-psychotype', async (req, res) => {
 });
 
 app.get('/profile', async (req, res) => {
-  const vkUserId = Number(req.query.vk_user_id);
-  if (!Number.isFinite(vkUserId)) {
-    res.status(400).json({ error: 'vk_user_id required' });
-    return;
-  }
+  const vkUserId = requireUser(req as AuthedRequest, res, req.query as Record<string, unknown>);
+  if (vkUserId == null) return;
 
   const row = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
@@ -385,9 +453,10 @@ app.get('/profile', async (req, res) => {
 });
 
 app.get('/profile/:vk_user_id', async (req, res) => {
-  const vkUserId = Number(req.params.vk_user_id);
-  if (!Number.isFinite(vkUserId)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
+  const vkUserId = requireUser(req as AuthedRequest, res);
+  if (vkUserId == null) return;
+  if (Number(req.params.vk_user_id) !== vkUserId) {
+    res.status(403).json({ error: 'Forbidden' });
     return;
   }
 
@@ -405,8 +474,10 @@ app.get('/profile/:vk_user_id', async (req, res) => {
 });
 
 app.post('/profile', async (req, res) => {
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
+
   const {
-    vk_user_id,
     trimester,
     onboarding_completed,
     base_type,
@@ -416,11 +487,6 @@ app.post('/profile', async (req, res) => {
     last_stress,
     techniques_completed,
   } = req.body ?? {};
-
-  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
-    return;
-  }
 
   const existing = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
@@ -496,19 +562,15 @@ app.post('/profile', async (req, res) => {
   res.json({ profile: await buildProfileResponse(row, vk_user_id) });
 });
 
-app.get('/techniques/recommend', handleRecommend);
-app.get('/recommendations', handleRecommend);
+app.get('/techniques/recommend', rateLimit('recommend'), handleRecommend);
+app.get('/recommendations', rateLimit('recommend'), handleRecommend);
 
 async function handleRecommend(req: express.Request, res: express.Response) {
-  const vkUserId = Number(req.query.vk_user_id);
+  const vkUserId = requireUser(req as AuthedRequest, res, req.query as Record<string, unknown>);
+  if (vkUserId == null) return;
   const stress = Number(req.query.stress ?? req.query.stress_level);
   const context = typeof req.query.context === 'string' ? req.query.context : null;
   const feeling = typeof req.query.feeling === 'string' ? req.query.feeling : null;
-
-  if (!Number.isFinite(vkUserId)) {
-    res.status(400).json({ error: 'vk_user_id required' });
-    return;
-  }
   if (!Number.isFinite(stress) || stress < 1 || stress > 10) {
     res.status(400).json({ error: 'stress must be 1–10' });
     return;
@@ -723,7 +785,7 @@ app.get('/gift/:token', async (req, res) => {
   });
 });
 
-app.post('/gift/:token/activate', async (req, res) => {
+app.post('/gift/:token/activate', rateLimit('gift_activate'), async (req, res) => {
   const { vk_user_id } = req.body ?? {};
   if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
     res.status(400).json({ error: 'vk_user_id must be a number' });
@@ -1059,7 +1121,7 @@ app.get('/partner/tips', async (req, res) => {
   });
 });
 
-app.post('/crisis/incidents', async (req, res) => {
+app.post('/crisis/incidents', rateLimitCrisis, async (req, res) => {
   const { vk_user_id, trigger_type, trigger_value, actions_taken } = req.body ?? {};
 
   if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
@@ -1299,21 +1361,25 @@ app.post('/epds', async (req, res) => {
 });
 
 app.delete('/profile', async (req, res) => {
-  const { vk_user_id } = req.body ?? {};
-  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
-    return;
-  }
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
 
   await query('DELETE FROM favorites WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM technique_usage WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM stress_log WHERE vk_user_id = $1', [vk_user_id]);
   await deleteMoodEntries(vk_user_id);
   await query('DELETE FROM crisis_incidents WHERE vk_user_id = $1', [vk_user_id]);
-  await query('DELETE FROM partner_profiles WHERE user_vk_id = $1', [vk_user_id]);
+  await query('DELETE FROM partner_profiles WHERE user_vk_id = $1 OR partner_vk_id = $1', [vk_user_id]);
+  await query(
+    'DELETE FROM technique_gifts WHERE sender_vk_id = $1 OR recipient_vk_id = $1',
+    [vk_user_id],
+  );
+  await query('DELETE FROM quiz_sessions WHERE vk_user_id = $1', [vk_user_id]);
+  await query('DELETE FROM auth_refresh_tokens WHERE vk_user_id = $1', [vk_user_id]);
+  await query('DELETE FROM analytics_events WHERE user_hash = $1', [hashUserId(vk_user_id)]);
+  await query('DELETE FROM subscriptions WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM profiles WHERE vk_user_id = $1', [vk_user_id]);
   await query('DELETE FROM users WHERE vk_user_id = $1', [vk_user_id]);
-  // Саму запись согласия не удаляем: она подтверждает, что обработка была правомерной.
   await query(
     'UPDATE consents SET revoked_at = NOW() WHERE vk_user_id = $1 AND revoked_at IS NULL',
     [vk_user_id],
@@ -1323,11 +1389,13 @@ app.delete('/profile', async (req, res) => {
 });
 
 app.post('/premium/activate', async (req, res) => {
-  const { vk_user_id } = req.body ?? {};
-  if (typeof vk_user_id !== 'number' || !Number.isFinite(vk_user_id)) {
-    res.status(400).json({ error: 'vk_user_id must be a number' });
+  if (process.env.NODE_ENV === 'production') {
+    res.status(403).json({ error: 'Подписка включается после подтверждения оплаты' });
     return;
   }
+
+  const vk_user_id = requireUser(req as AuthedRequest, res, req.body ?? {});
+  if (vk_user_id == null) return;
 
   const existing = await queryOne<ProfileRow>(
     'SELECT * FROM profiles WHERE vk_user_id = $1',
@@ -1352,6 +1420,12 @@ app.post('/premium/activate', async (req, res) => {
   );
 
   res.json({ profile: await buildProfileResponse(row, vk_user_id) });
+});
+
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error(error);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Что-то пошло не так' });
 });
 
 async function main() {

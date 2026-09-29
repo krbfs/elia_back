@@ -165,6 +165,17 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_consents_user_accepted
       ON consents (vk_user_id, accepted_at DESC);
 
+    CREATE TABLE IF NOT EXISTS quiz_sessions (
+      id TEXT PRIMARY KEY,
+      vk_user_id BIGINT NOT NULL,
+      started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      preview_at TIMESTAMPTZ,
+      consumed_at TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_quiz_sessions_user
+      ON quiz_sessions (vk_user_id, started_at DESC);
+
     CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
       token_hash TEXT PRIMARY KEY,
       vk_user_id BIGINT NOT NULL REFERENCES users(vk_user_id) ON DELETE CASCADE,

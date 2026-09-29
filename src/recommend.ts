@@ -471,9 +471,6 @@ export function serializeTechnique(row: TechniqueRow) {
     audio_url: row.audio_url,
     level: row.level,
     context: row.context,
-    psychotypes: psychotypesFor(row),
-    reaction: row.reaction,
-    evidence: row.evidence,
     is_premium: row.is_premium,
   };
 }
